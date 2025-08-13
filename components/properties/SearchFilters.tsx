@@ -3,14 +3,12 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SearchFilters as SearchFiltersType } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Search, Filter, X } from 'lucide-react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface SearchFiltersProps {
   onFiltersChange: (filters: SearchFiltersType) => void;
@@ -29,11 +27,6 @@ const transactionTypes = [
   { value: 'rent', label: 'Location' },
 ];
 
-const features = [
-  'Balcony', 'Parking', 'Garden', 'Terrace', 'Pool', 'Garage', 
-  'Elevator', 'Air Conditioning', 'Fireplace', 'Basement'
-];
-
 export function SearchFilters({ onFiltersChange, initialFilters = {} }: SearchFiltersProps) {
   const [filters, setFilters] = useState<SearchFiltersType>(initialFilters);
   const [isOpen, setIsOpen] = useState(false);
@@ -47,6 +40,7 @@ export function SearchFilters({ onFiltersChange, initialFilters = {} }: SearchFi
 
   const applyFilters = () => {
     onFiltersChange(filters);
+    setIsOpen(false);
     
     // Update URL params
     const params = new URLSearchParams(searchParams);
@@ -62,14 +56,15 @@ export function SearchFilters({ onFiltersChange, initialFilters = {} }: SearchFi
       }
     });
     
-    router.push(`/properties?${params.toString()}`, { scroll: false });
+    router.push(`/?${params.toString()}`, { scroll: false });
   };
 
   const clearFilters = () => {
-    const clearedFilters: SearchFiltersType = { query: filters.query };
+    const clearedFilters: SearchFiltersType = {};
     setFilters(clearedFilters);
     onFiltersChange(clearedFilters);
-    router.push('/properties', { scroll: false });
+    setIsOpen(false);
+    router.push('/', { scroll: false });
   };
 
   const hasActiveFilters = Object.entries(filters).some(([key, value]) => 
@@ -77,240 +72,194 @@ export function SearchFilters({ onFiltersChange, initialFilters = {} }: SearchFi
   );
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5" />
-            Recherche
-          </CardTitle>
-          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-            <CollapsibleTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Filter className="h-4 w-4 mr-2" />
-                Filtres avancés
-                {hasActiveFilters && (
-                  <span className="ml-2 bg-primary text-primary-foreground px-2 py-0.5 rounded-full text-xs">
-                    {Object.values(filters).filter(v => v !== undefined && v !== null && v !== '').length - (filters.query ? 1 : 0)}
-                  </span>
-                )}
-              </Button>
-            </CollapsibleTrigger>
-          </Collapsible>
-        </div>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        {/* Search Query */}
-        <div className="space-y-2">
-          <Label htmlFor="query">Recherche générale</Label>
-          <Input
-            id="query"
-            placeholder="Ville, titre, description..."
-            value={filters.query || ''}
-            onChange={(e) => updateFilters({ query: e.target.value })}
-          />
-        </div>
-
-        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-          <CollapsibleContent className="space-y-4">
-            {/* Transaction Type */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="transactionType">Type de transaction</Label>
-                <Select 
-                  value={filters.transactionType || ''} 
-                  onValueChange={(value) => updateFilters({ transactionType: value || undefined })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Tous" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Tous</SelectItem>
-                    {transactionTypes.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Property Type */}
-              <div className="space-y-2">
-                <Label htmlFor="type">Type de bien</Label>
-                <Select 
-                  value={filters.type || ''} 
-                  onValueChange={(value) => updateFilters({ type: value || undefined })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Tous" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Tous</SelectItem>
-                    {propertyTypes.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Price Range */}
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="h-10 px-4">
+          <Filter className="h-4 w-4 mr-2" />
+          Filtres
+          {hasActiveFilters && (
+            <span className="ml-2 bg-primary text-primary-foreground px-2 py-0.5 rounded-full text-xs">
+              {Object.values(filters).filter(v => v !== undefined && v !== null && v !== '').length}
+            </span>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-96 p-4" align="end">
+        <div className="space-y-4">
+          {/* Transaction Type & Property Type */}
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>Prix (€)</Label>
-              <div className="grid grid-cols-2 gap-2">
-                <Input
-                  type="number"
-                  placeholder="Prix min"
-                  value={filters.priceMin || ''}
-                  onChange={(e) => updateFilters({ priceMin: e.target.value ? Number(e.target.value) : undefined })}
-                />
-                <Input
-                  type="number"
-                  placeholder="Prix max"
-                  value={filters.priceMax || ''}
-                  onChange={(e) => updateFilters({ priceMax: e.target.value ? Number(e.target.value) : undefined })}
-                />
-              </div>
+              <Label htmlFor="transactionType" className="text-sm font-medium">Transaction</Label>
+              <Select 
+                value={filters.transactionType || ''} 
+                onValueChange={(value) => updateFilters({ transactionType: value || undefined })}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Tous" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Tous</SelectItem>
+                  {transactionTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Surface Range */}
             <div className="space-y-2">
-              <Label>Surface (m²)</Label>
-              <div className="grid grid-cols-2 gap-2">
-                <Input
-                  type="number"
-                  placeholder="Surface min"
-                  value={filters.surfaceMin || ''}
-                  onChange={(e) => updateFilters({ surfaceMin: e.target.value ? Number(e.target.value) : undefined })}
-                />
-                <Input
-                  type="number"
-                  placeholder="Surface max"
-                  value={filters.surfaceMax || ''}
-                  onChange={(e) => updateFilters({ surfaceMax: e.target.value ? Number(e.target.value) : undefined })}
-                />
-              </div>
+              <Label htmlFor="type" className="text-sm font-medium">Type</Label>
+              <Select 
+                value={filters.type || ''} 
+                onValueChange={(value) => updateFilters({ type: value || undefined })}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Tous" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Tous</SelectItem>
+                  {propertyTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+          </div>
 
-            {/* Rooms */}
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>Pièces min.</Label>
-                <Select 
-                  value={filters.rooms?.toString() || ''} 
-                  onValueChange={(value) => updateFilters({ rooms: value ? Number(value) : undefined })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Toutes" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Toutes</SelectItem>
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                      <SelectItem key={num} value={num.toString()}>
-                        {num}+
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Chambres min.</Label>
-                <Select 
-                  value={filters.bedrooms?.toString() || ''} 
-                  onValueChange={(value) => updateFilters({ bedrooms: value ? Number(value) : undefined })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Toutes" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Toutes</SelectItem>
-                    {[1, 2, 3, 4, 5, 6].map((num) => (
-                      <SelectItem key={num} value={num.toString()}>
-                        {num}+
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>SdB min.</Label>
-                <Select 
-                  value={filters.bathrooms?.toString() || ''} 
-                  onValueChange={(value) => updateFilters({ bathrooms: value ? Number(value) : undefined })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Toutes" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Toutes</SelectItem>
-                    {[1, 2, 3, 4].map((num) => (
-                      <SelectItem key={num} value={num.toString()}>
-                        {num}+
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* City */}
-            <div className="space-y-2">
-              <Label htmlFor="city">Ville</Label>
+          {/* Price Range */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Prix (€)</Label>
+            <div className="grid grid-cols-2 gap-2">
               <Input
-                id="city"
-                placeholder="Ville de recherche"
-                value={filters.city || ''}
-                onChange={(e) => updateFilters({ city: e.target.value })}
+                type="number"
+                placeholder="Min"
+                value={filters.priceMin || ''}
+                onChange={(e) => updateFilters({ priceMin: e.target.value ? Number(e.target.value) : undefined })}
+                className="h-9 text-sm"
+              />
+              <Input
+                type="number"
+                placeholder="Max"
+                value={filters.priceMax || ''}
+                onChange={(e) => updateFilters({ priceMax: e.target.value ? Number(e.target.value) : undefined })}
+                className="h-9 text-sm"
               />
             </div>
+          </div>
 
-            {/* Features */}
-            <div className="space-y-2">
-              <Label>Équipements</Label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {features.map((feature) => (
-                  <div key={feature} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={feature}
-                      checked={filters.features?.includes(feature) || false}
-                      onCheckedChange={(checked) => {
-                        const currentFeatures = filters.features || [];
-                        const updatedFeatures = checked
-                          ? [...currentFeatures, feature]
-                          : currentFeatures.filter(f => f !== feature);
-                        updateFilters({ features: updatedFeatures.length > 0 ? updatedFeatures : undefined });
-                      }}
-                    />
-                    <Label htmlFor={feature} className="text-sm">
-                      {feature}
-                    </Label>
-                  </div>
-                ))}
-              </div>
+          {/* Surface Range */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Surface (m²)</Label>
+            <div className="grid grid-cols-2 gap-2">
+              <Input
+                type="number"
+                placeholder="Min"
+                value={filters.surfaceMin || ''}
+                onChange={(e) => updateFilters({ surfaceMin: e.target.value ? Number(e.target.value) : undefined })}
+                className="h-9 text-sm"
+              />
+              <Input
+                type="number"
+                placeholder="Max"
+                value={filters.surfaceMax || ''}
+                onChange={(e) => updateFilters({ surfaceMax: e.target.value ? Number(e.target.value) : undefined })}
+                className="h-9 text-sm"
+              />
             </div>
-          </CollapsibleContent>
-        </Collapsible>
+          </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2 pt-2">
-          <Button onClick={applyFilters} className="flex-1">
-            <Search className="h-4 w-4 mr-2" />
-            Rechercher
-          </Button>
-          {hasActiveFilters && (
-            <Button variant="outline" onClick={clearFilters}>
-              <X className="h-4 w-4 mr-2" />
-              Effacer
+          {/* Rooms */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="space-y-2">
+              <Label className="text-xs">Pièces</Label>
+              <Select 
+                value={filters.rooms?.toString() || ''} 
+                onValueChange={(value) => updateFilters({ rooms: value ? Number(value) : undefined })}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Toutes" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Toutes</SelectItem>
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                    <SelectItem key={num} value={num.toString()}>
+                      {num}+
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs">Chambres</Label>
+              <Select 
+                value={filters.bedrooms?.toString() || ''} 
+                onValueChange={(value) => updateFilters({ bedrooms: value ? Number(value) : undefined })}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Toutes" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Toutes</SelectItem>
+                  {[1, 2, 3, 4, 5, 6].map((num) => (
+                    <SelectItem key={num} value={num.toString()}>
+                      {num}+
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs">SdB</Label>
+              <Select 
+                value={filters.bathrooms?.toString() || ''} 
+                onValueChange={(value) => updateFilters({ bathrooms: value ? Number(value) : undefined })}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Toutes" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Toutes</SelectItem>
+                  {[1, 2, 3, 4].map((num) => (
+                    <SelectItem key={num} value={num.toString()}>
+                      {num}+
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* City */}
+          <div className="space-y-2">
+            <Label htmlFor="city" className="text-sm font-medium">Ville</Label>
+            <Input
+              id="city"
+              placeholder="Rechercher une ville"
+              value={filters.city || ''}
+              onChange={(e) => updateFilters({ city: e.target.value })}
+              className="h-9"
+            />
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-2 pt-4 border-t">
+            <Button onClick={applyFilters} size="sm" className="flex-1">
+              <Search className="h-4 w-4 mr-2" />
+              Appliquer
             </Button>
-          )}
+            {hasActiveFilters && (
+              <Button variant="outline" size="sm" onClick={clearFilters}>
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      </PopoverContent>
+    </Popover>
   );
 }

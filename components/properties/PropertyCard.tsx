@@ -44,11 +44,18 @@ export function PropertyCard({ property }: PropertyCardProps) {
             </div>
           )}
           
-          <div className="absolute top-2 left-2 flex gap-2">
-            <Badge variant={property.transactionType === 'sale' ? 'default' : 'secondary'}>
+          <div className="absolute top-3 left-3 flex gap-2">
+            <Badge 
+              variant={property.transactionType === 'sale' ? 'default' : 'secondary'}
+              className={`px-3 py-1.5 font-semibold text-xs shadow-lg backdrop-blur-sm ${
+                property.transactionType === 'sale' 
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0' 
+                  : 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-0'
+              }`}
+            >
               {property.transactionType === 'sale' ? 'Vente' : 'Location'}
             </Badge>
-            <Badge variant="outline" className="bg-white/90">
+            <Badge variant="outline" className="bg-white/95 backdrop-blur-sm border-white/50 text-gray-700 font-medium px-3 py-1.5">
               {property.type === 'house' ? 'Maison' : 
                property.type === 'apartment' ? 'Appartement' :
                property.type === 'office' ? 'Bureau' : 'Terrain'}
@@ -59,14 +66,14 @@ export function PropertyCard({ property }: PropertyCardProps) {
             <Button
               size="icon"
               variant="ghost"
-              className={`absolute top-2 right-2 h-8 w-8 ${
+              className={`absolute top-3 right-3 h-10 w-10 rounded-full shadow-lg backdrop-blur-sm transition-all duration-200 ${
                 isFavorite(property.id) 
-                  ? 'text-red-500 bg-white/90 hover:bg-white' 
-                  : 'text-gray-600 bg-white/70 hover:bg-white/90'
+                  ? 'text-red-500 bg-white/95 hover:bg-white hover:scale-110' 
+                  : 'text-gray-600 bg-white/80 hover:bg-white/95 hover:scale-110'
               }`}
               onClick={handleFavoriteClick}
             >
-              <Heart className={`h-4 w-4 ${isFavorite(property.id) ? 'fill-current' : ''}`} />
+              <Heart className={`h-5 w-5 ${isFavorite(property.id) ? 'fill-current' : ''}`} />
             </Button>
           )}
         </div>
@@ -74,7 +81,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
 
       <CardContent className="p-4">
         <Link href={`/properties/${property.id}`}>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex items-start justify-between">
               <h3 className="font-semibold text-lg line-clamp-2 group-hover:text-primary transition-colors">
                 {property.title}

@@ -20,6 +20,7 @@ export default function HomePage() {
   const [selectedProperty, setSelectedProperty] = useState<string | undefined>();
   const searchParams = useSearchParams();
   const { properties, loading, error } = useProperties(filters);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Initialize filters from URL params
   useEffect(() => {
@@ -88,101 +89,53 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center space-y-6">
-            <h1 className="text-4xl md:text-5xl font-bold">
-              Annonces Immobilières
-            </h1>
-            <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-              Découvrez notre sélection de biens à vendre et à louer
-            </p>
-            
-            {/* Search Form */}
-            <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
-              <div className="flex flex-col sm:flex-row gap-3 bg-white p-3 rounded-xl shadow-lg">
-                <div className="flex-1">
-                  <Input
-                    type="text"
-                    placeholder="Rechercher par ville, quartier, type de bien..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="border-0 focus-visible:ring-0 text-gray-900 h-12 bg-transparent"
-                  />
-                </div>
-                <Button type="submit" size="lg" className="h-12 px-6 bg-blue-600 hover:bg-blue-700">
-                  <Search className="h-5 w-5 mr-2" />
-                  Rechercher
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </section>
+    <div className="min-h-screen bg-gray-50">
 
       {/* Main Content */}
-      <section className="py-8">
+      <section className="py-6">
         <div className="container mx-auto px-4">
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {loading ? 'Recherche en cours...' : `${properties.length} bien${properties.length > 1 ? 's' : ''} trouvé${properties.length > 1 ? 's' : ''}`}
-                </h2>
-                {getActiveFiltersCount() > 0 && (
-                  <Badge variant="secondary" className="mt-2">
-                    <SlidersHorizontal className="h-3 w-3 mr-1" />
-                    {getActiveFiltersCount()} filtre{getActiveFiltersCount() > 1 ? 's' : ''}
-                  </Badge>
-                )}
-              </div>
-            </div>
-
-            {/* Search Filters */}
-            <div className="mb-8">
+          {/* Compact Search Bar */}
+          <div className="mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <form onSubmit={handleSearch} className="flex-1 max-w-md">
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Rechercher..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="h-10 flex-1"
+                  />
+                  <Button type="submit" size="sm" className="h-10 px-4">
+                    <Search className="h-4 w-4" />
+                  </Button>
+                </div>
+              </form>
+              
               <SearchFilters
                 onFiltersChange={handleFiltersChange}
                 initialFilters={filters}
               />
             </div>
 
-            {/* Property Stats */}
-            {!loading && !error && properties.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto mb-8">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">{propertyStats.sale}</div>
-                  <div className="text-sm text-gray-600">À vendre</div>
-                  {propertyStats.avgSalePrice > 0 && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      Moy. {(propertyStats.avgSalePrice / 1000).toFixed(0)}k€
-                    </div>
-                  )}
-                </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">{propertyStats.rent}</div>
-                  <div className="text-sm text-gray-600">À louer</div>
-                  {propertyStats.avgRentPrice > 0 && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      Moy. {propertyStats.avgRentPrice}€/mois
-                    </div>
-                  )}
-                </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <div className="text-2xl font-bold text-gray-600">{propertyStats.total}</div>
-                  <div className="text-sm text-gray-600">Total</div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    Biens disponibles
-                  </div>
-                </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl font-semibold text-gray-900">
+                  {loading ? 'Recherche en cours...' : `${properties.length} bien${properties.length > 1 ? 's' : ''}`}
+                </h1>
+                {getActiveFiltersCount() > 0 && (
+                  <Badge variant="secondary" className="text-xs">
+                    <SlidersHorizontal className="h-3 w-3 mr-1" />
+                    {getActiveFiltersCount()} filtre{getActiveFiltersCount() > 1 ? 's' : ''}
+                  </Badge>
+                )}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Results with Tabs */}
           <Tabs defaultValue="grid" className="w-full">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-end mb-4">
               <TabsList className="grid w-fit grid-cols-2">
                 <TabsTrigger value="grid" className="flex items-center gap-2">
                   <Grid className="h-4 w-4" />
@@ -214,7 +167,7 @@ export default function HomePage() {
                   ))}
                 </div>
               ) : properties.length === 0 ? (
-                <div className="text-center py-12">
+                <div className="text-center py-16">
                   <div className="text-gray-500 mb-4">
                     <Home className="h-12 w-12 mx-auto mb-2" />
                     <p className="text-lg font-semibold">Aucun bien trouvé</p>
@@ -270,29 +223,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Quick Stats Footer */}
-      <section className="py-12 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
-            <div>
-              <div className="text-2xl font-bold text-blue-600">{propertyStats.total}</div>
-              <div className="text-sm text-gray-600">Biens disponibles</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-green-600">{propertyStats.sale}</div>
-              <div className="text-sm text-gray-600">À vendre</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-purple-600">{propertyStats.rent}</div>
-              <div className="text-sm text-gray-600">À louer</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-orange-600">2,500+</div>
-              <div className="text-sm text-gray-600">Clients satisfaits</div>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
