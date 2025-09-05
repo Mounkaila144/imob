@@ -33,6 +33,10 @@ export function SearchFilters({ onFiltersChange, initialFilters = {} }: SearchFi
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Debug logs
+  console.log('SearchFilters render - isOpen:', isOpen);
+  console.log('SearchFilters render - filters:', filters);
+
   const updateFilters = (newFilters: Partial<SearchFiltersType>) => {
     const updated = { ...filters, ...newFilters };
     setFilters(updated);
@@ -72,9 +76,16 @@ export function SearchFilters({ onFiltersChange, initialFilters = {} }: SearchFi
   );
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={(open) => {
+      console.log('Popover onOpenChange called with:', open);
+      setIsOpen(open);
+    }}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="h-10 px-4">
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-10 px-4"
+        >
           <Filter className="h-4 w-4 mr-2" />
           Filtres
           {hasActiveFilters && (
@@ -84,7 +95,7 @@ export function SearchFilters({ onFiltersChange, initialFilters = {} }: SearchFi
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-4" align="end">
+      <PopoverContent className="w-96 p-4 z-[9999]" align="end">
         <div className="space-y-4">
           {/* Transaction Type & Property Type */}
           <div className="grid grid-cols-2 gap-3">
