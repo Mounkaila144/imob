@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ListingPhotoController;
 use Illuminate\Http\Request;
@@ -42,6 +43,16 @@ Route::middleware(['auth:api', 'active.user'])->group(function () {
     Route::middleware('role:admin')->group(function () {
         // Admin can manage all listings
         Route::put('listings/{listing}/status', [ListingController::class, 'updateStatus']);
+
+        // User management routes
+        Route::prefix('admin/users')->group(function () {
+            Route::get('/', [UserController::class, 'index']);
+            Route::get('/statistics', [UserController::class, 'statistics']);
+            Route::get('/{user}', [UserController::class, 'show']);
+            Route::put('/{user}/status', [UserController::class, 'updateStatus']);
+            Route::put('/{user}/role', [UserController::class, 'updateRole']);
+            Route::delete('/{user}', [UserController::class, 'destroy']);
+        });
     });
 
     // Lister routes (agents immobiliers)
