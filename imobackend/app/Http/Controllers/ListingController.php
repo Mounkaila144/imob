@@ -19,8 +19,14 @@ class ListingController extends ApiController
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Listing::with(['user.profile', 'photos', 'amenities'])
-            ->where('status', 'published');
+        $query = Listing::with(['user.profile', 'photos', 'amenities']);
+
+        // Pour les admins connectés, montrer toutes les propriétés
+        // Pour les autres, seulement les propriétés publiées
+        $user = auth('api')->user();
+        if (!$user || !$user->isAdmin()) {
+            $query->where('status', 'published');
+        }
 
         // Filtres de recherche
         if ($request->filled('type')) {
