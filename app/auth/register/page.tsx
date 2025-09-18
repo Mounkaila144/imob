@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth, RegisterUserData } from '@/hooks/useAuth';
 import { registerSchema, RegisterFormData } from '@/lib/validations';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,7 +23,7 @@ export default function RegisterPage() {
   const { register: registerUser, loading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const defaultRole = searchParams.get('role') as 'seller' | 'buyer' || 'buyer';
+  const defaultRole = searchParams.get('role') as 'lister' | 'client' || 'client';
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -37,16 +37,20 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setError('');
-      await registerUser({
+      const userData: RegisterUserData = {
         name: data.name,
         email: data.email,
-        role: data.role,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+        role: data.role === 'seller' ? 'lister' : 'client',
         phone: data.phone,
-      });
+      };
+      await registerUser(userData);
       toast.success('Inscription réussie !');
       router.push('/');
-    } catch (err) {
-      setError('Une erreur est survenue lors de l\'inscription');
+    } catch (err: any) {
+      const errorMessage = err?.message || 'Une erreur est survenue lors de l\'inscription';
+      setError(errorMessage);
       toast.error('Échec de l\'inscription');
     }
   };

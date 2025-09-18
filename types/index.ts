@@ -1,12 +1,18 @@
 export interface User {
-  id: string;
+  id: number;
   email: string;
   name: string;
-  avatar?: string;
-  role: 'admin' | 'seller' | 'buyer';
+  role: 'admin' | 'lister' | 'client';
   phone?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  status: string;
+  email_verified_at?: string;
+  profile: {
+    avatar_path?: string;
+    company?: string;
+    about?: string;
+  };
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Property {
@@ -42,8 +48,8 @@ export interface Property {
   status: 'draft' | 'active' | 'sold' | 'rented' | 'suspended';
   viewCount: number;
   favoriteCount: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PropertyPhoto {
@@ -66,7 +72,7 @@ export interface Favorite {
   id: string;
   userId: string;
   propertyId: string;
-  createdAt: Date;
+  createdAt: string;
 }
 
 export interface VisitRequest {
@@ -76,11 +82,11 @@ export interface VisitRequest {
   buyerId: string;
   buyer: User;
   message: string;
-  proposedSlots: Date[];
-  selectedSlot?: Date;
+  proposedSlots: string[];
+  selectedSlot?: string;
   status: 'pending' | 'accepted' | 'rejected' | 'completed';
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface SearchFilters {
@@ -115,7 +121,7 @@ export interface Activity {
   id: string;
   type: 'property_created' | 'visit_requested' | 'user_registered' | 'property_sold';
   description: string;
-  createdAt: Date;
+  createdAt: string;
   user?: User;
   property?: Property;
 }

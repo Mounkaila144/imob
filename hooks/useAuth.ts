@@ -1,14 +1,28 @@
 'use client';
 
 import { useState, useEffect, createContext, useContext } from 'react';
+import { useRouter } from 'next/navigation';
 import { User } from '@/types';
+import { authApi, ApiError } from '@/lib/api';
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
-  logout: () => void;
+  register: (userData: RegisterUserData) => Promise<void>;
+  logout: () => Promise<void>;
   loading: boolean;
+  refreshUser: () => Promise<void>;
+}
+
+interface RegisterUserData {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  role: 'client' | 'lister';
+  phone?: string;
+  company?: string;
+  about?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,61 +38,115 @@ export function useAuth() {
 export function useAuthProvider() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    // Check for stored user session
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    initializeAuth();
+  }, []);
+
+  const initializeAuth = async () => {
+    const token = localStorage.getItem('auth_token');
+    console.log('Initializing auth, token found:', !!token);
+
+    if (token) {
+      try {
+        console.log('Attempting to fetch user profile...');
+        const userData = await authApi.getProfile();
+        console.log('User profile fetched successfully:', userData);
+        setUser(userData);
+
+        // Redirection automatique pour les admins
+        if (userData.role === 'admin' && window.location.pathname !== '/admin') {
+          console.log('Admin user detected, redirecting to admin dashboard');
+          router.push('/admin');
+        }
+      } catch (error) {
+        console.error('Failed to load user profile:', error);
+        localStorage.removeItem('auth_token');
+        setUser(null);
+      }
+    } else {
+      console.log('No token found, user not authenticated');
+      setUser(null);
     }
     setLoading(false);
-  }, []);
+  };
 
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
-      // Mock authentication - replace with real API call
-      const mockUser: User = {
-        id: '1',
-        email,
-        name: email.includes('admin') ? 'Admin User' : email.includes('seller') ? 'Seller User' : 'Buyer User',
-        role: email.includes('admin') ? 'admin' : email.includes('seller') ? 'seller' : 'buyer',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      setUser(mockUser);
+      const response = await authApi.login({ email, password });
+      setUser(response.user);
+
+      // Redirection automatique pour les admins après login
+      if (response.user.role === 'admin') {
+        console.log('Admin login detected, redirecting to admin dashboard');
+        router.push('/admin');
+      }
     } catch (error) {
-      throw new Error('Login failed');
+      if (error instanceof ApiError) {
+        throw new Error(error.message);
+      }
+      throw new Error('Erreur de connexion');
     } finally {
       setLoading(false);
     }
   };
 
-  const register = async (userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const register = async (userData: RegisterUserData) => {
     setLoading(true);
     try {
-      // Mock registration - replace with real API call
-      const newUser: User = {
-        ...userData,
-        id: Math.random().toString(36).substr(2, 9),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      
-      localStorage.setItem('user', JSON.stringify(newUser));
-      setUser(newUser);
+      const response = await authApi.register({
+        name: userData.name,
+        email: userData.email,
+        password: userData.password,
+        password_confirmation: userData.confirmPassword,
+        role: userData.role,
+        phone: userData.phone,
+        company: userData.company,
+        about: userData.about,
+      });
+      setUser(response.user);
+
+      // Redirection automatique pour les admins après inscription
+      if (response.user.role === 'admin') {
+        console.log('Admin registration detected, redirecting to admin dashboard');
+        router.push('/admin');
+      }
     } catch (error) {
-      throw new Error('Registration failed');
+      if (error instanceof ApiError) {
+        if (error.errors) {
+          const errorMessages = Object.values(error.errors).flat();
+          throw new Error(errorMessages.join(', '));
+        }
+        throw new Error(error.message);
+      }
+      throw new Error('Erreur lors de l\'inscription');
     } finally {
       setLoading(false);
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('user');
-    setUser(null);
+  const logout = async () => {
+    setLoading(true);
+    try {
+      await authApi.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      setLoading(false);
+    }
+  };
+
+  const refreshUser = async () => {
+    try {
+      const userData = await authApi.getProfile();
+      setUser(userData);
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+      logout();
+    }
   };
 
   return {
@@ -87,7 +155,9 @@ export function useAuthProvider() {
     register,
     logout,
     loading,
+    refreshUser,
   };
 }
 
 export { AuthContext };
+export type { RegisterUserData };
