@@ -246,8 +246,8 @@
             ],
             "authors": [
                 {
-                    "name": "Guilherme Blanco",
-                    "email": "guilhermeblanco@gmail.com"
+                    "name": "Guidalherme Blanco",
+                    "email": "Guidalhermeblanco@gmail.com"
                 },
                 {
                     "name": "Roman Borschel",
@@ -336,8 +336,8 @@
             ],
             "authors": [
                 {
-                    "name": "Guilherme Blanco",
-                    "email": "guilhermeblanco@gmail.com"
+                    "name": "Guidalherme Blanco",
+                    "email": "Guidalhermeblanco@gmail.com"
                 },
                 {
                     "name": "Roman Borschel",
@@ -3284,7 +3284,7 @@
             ],
             "description": "A PHP library for generating and working with universally unique identifiers (UUIDs).",
             "keywords": [
-                "guid",
+                "Guidad",
                 "identifier",
                 "uuid"
             ],

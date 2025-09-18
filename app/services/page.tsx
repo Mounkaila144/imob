@@ -189,7 +189,7 @@ export default function ServicesPage() {
               </Button>
               <Button size="lg" variant="outline" className="flex items-center space-x-2">
                 <Mail className="h-5 w-5" />
-                <span>contact@Gui-Center.fr</span>
+                <span>contact@Guida-Center.fr</span>
               </Button>
             </div>
           </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 // import { useActiveRoute } from '@/hooks/useActiveRoute';
 // import { QuickActions, PageContext } from '@/components/layout/QuickActions';
@@ -174,12 +175,18 @@ export function Header() {
           <Link href="/" className="flex items-center space-x-3 group">
             <div className="relative logo-glow">
               <div className="absolute inset-0 bg-blue-600 rounded-lg blur-sm opacity-20 group-hover:opacity-40 transition-all duration-300"></div>
-              <div className="relative bg-gradient-to-br from-blue-600 to-blue-700 p-2 rounded-lg shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                <Home className="h-6 w-6 text-white" />
+              <div className="relative bg-white p-2 rounded-lg shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                <Image
+                  src="/logo.png"
+                  alt="Guida-Center Logo"
+                  width={24}
+                  height={24}
+                  className="h-6 w-6 object-contain"
+                />
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-xl text-gray-900 group-hover:text-blue-600 transition-colors duration-200">Gui-Center</span>
+              <span className="font-bold text-xl text-gray-900 group-hover:text-blue-600 transition-colors duration-200">Guida-Center</span>
               <span className="text-xs text-gray-500 hidden sm:block group-hover:text-blue-500 transition-colors duration-200">Immobilier moderne</span>
             </div>
           </Link>
@@ -421,11 +428,17 @@ export function Header() {
                   {/* Mobile Header */}
                   <div className="flex items-center justify-between p-6 border-b">
                     <Link href="/" className="flex items-center space-x-3" onClick={() => setIsMobileMenuOpen(false)}>
-                      <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-2 rounded-lg">
-                        <Home className="h-5 w-5 text-white" />
+                      <div className="bg-white p-2 rounded-lg shadow-lg">
+                        <Image
+                          src="/logo.png"
+                          alt="Guida-Center Logo"
+                          width={20}
+                          height={20}
+                          className="h-5 w-5 object-contain"
+                        />
                       </div>
                       <div>
-                        <span className="font-bold text-lg text-gray-900">Gui-Center</span>
+                        <span className="font-bold text-lg text-gray-900">Guida-Center</span>
                         <p className="text-xs text-gray-500">Immobilier moderne</p>
                       </div>
                     </Link>

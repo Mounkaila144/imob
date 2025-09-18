@@ -10,7 +10,7 @@ import { ConditionalLayout } from '@/components/layout/ConditionalLayout';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Gui-Center - Plateforme Immobilière Moderne',
+  title: 'Guida-Center - Plateforme Immobilière Moderne',
   description: 'La plateforme immobilière qui simplifie l\'achat, la vente et la location de biens immobiliers.',
 };
 

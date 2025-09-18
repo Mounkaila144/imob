@@ -1,10 +1,10 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides Guidadance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
 
-Gui-Center is a French real estate platform ("Plateforme Immobilière Moderne") built with Next.js 13.5.1, TypeScript, and Tailwind CSS. The application allows users to browse, search, and filter property listings for both sale and rental.
+Guida-Center is a French real estate platform ("Plateforme Immobilière Moderne") built with Next.js 13.5.1, TypeScript, and Tailwind CSS. The application allows users to browse, search, and filter property listings for both sale and rental.
 
 ## Development Commands
 
