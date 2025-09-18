@@ -185,3 +185,98 @@ export function useSingleListing(id: number): UseSingleListingReturn {
     refetch,
   };
 }
+
+// Hook pour les listings publics (page d'accueil)
+interface UsePublicListingsParams {
+  type?: 'sale' | 'rent';
+  property_type?: string;
+  city?: string;
+  min_price?: number;
+  max_price?: number;
+  rooms?: number;
+  bedrooms?: number;
+  search?: string;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+  per_page?: number;
+  page?: number;
+}
+
+interface UsePublicListingsReturn {
+  listings: ListingResponse[];
+  pagination: PaginatedListingResponse['pagination'] | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => Promise<void>;
+  loadMore: () => Promise<void>;
+}
+
+export function usePublicListings(params?: UsePublicListingsParams): UsePublicListingsReturn {
+  const [listings, setListings] = useState<ListingResponse[]>([]);
+  const [pagination, setPagination] = useState<PaginatedListingResponse['pagination'] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchListings = async (page = 1, reset = true) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await listingsApi.getPublicListings({
+        ...params,
+        page,
+      });
+
+      // La réponse de l'API public a la structure { success, message, data, pagination }
+      if (response && response.data && Array.isArray(response.data)) {
+        if (reset) {
+          setListings(response.data);
+        } else {
+          setListings(prev => [...prev, ...response.data]);
+        }
+        setPagination(response.pagination || null);
+      } else {
+        console.error('Invalid response format:', response);
+        setError('Format de réponse invalide');
+        setListings([]);
+        setPagination(null);
+      }
+    } catch (err) {
+      console.error('Error fetching public listings:', err);
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError('Erreur lors du chargement des propriétés');
+      }
+      if (reset) {
+        setListings([]);
+        setPagination(null);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refetch = async () => {
+    await fetchListings(1, true);
+  };
+
+  const loadMore = async () => {
+    if (pagination && pagination.has_more_pages) {
+      await fetchListings(pagination.current_page + 1, false);
+    }
+  };
+
+  useEffect(() => {
+    fetchListings();
+  }, [params?.type, params?.property_type, params?.city, params?.min_price, params?.max_price, params?.rooms, params?.bedrooms, params?.search, params?.sort_by, params?.sort_order, params?.per_page]);
+
+  return {
+    listings,
+    pagination,
+    loading,
+    error,
+    refetch,
+    loadMore,
+  };
+}

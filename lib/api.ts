@@ -100,6 +100,16 @@ async function apiRequest<T>(
       return data as T;
     }
 
+    // Pour les endpoints de listings publics qui ont une pagination
+    if (endpoint.startsWith('/listings') && data.pagination) {
+      return data as T;
+    }
+
+    // Pour les endpoints de listing spécifique qui retournent un objet
+    if (endpoint.startsWith('/listings/') && !data.pagination) {
+      return data.data !== undefined ? data.data as T : data as T;
+    }
+
     // Pour les autres endpoints qui utilisent la structure data
     return data.data !== undefined ? data.data as T : data as T;
   } catch (error) {
