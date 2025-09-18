@@ -174,7 +174,7 @@ L'API backend est fonctionnelle à l'adresse http://localhost:8000/api/admin/use
                 🎯 Gestion des Utilisateurs - DEMO
               </h1>
               <p style={{ color: '#9ca3af', margin: '0' }}>
-                Interface admin pour gérer tous les utilisateurs de la plateforme Gida-Center
+                Interface admin pour gérer tous les utilisateurs de la plateforme Gui-Center
               </p>
             </div>
             <button

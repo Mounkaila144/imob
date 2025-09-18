@@ -60,14 +60,14 @@ export default function RegisterPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <Link href="/" className="flex items-center justify-center space-x-2 mb-6">
           <Home className="h-8 w-8 text-blue-600" />
-          <span className="font-bold text-2xl">Gida-Center</span>
+          <span className="font-bold text-2xl">Gui-Center</span>
         </Link>
 
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Créer un compte</CardTitle>
             <CardDescription>
-              Rejoignez la communauté Gida-Center
+              Rejoignez la communauté Gui-Center
             </CardDescription>
           </CardHeader>
 

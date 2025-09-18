@@ -179,7 +179,7 @@ export function Header() {
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-xl text-gray-900 group-hover:text-blue-600 transition-colors duration-200">Gida-Center</span>
+              <span className="font-bold text-xl text-gray-900 group-hover:text-blue-600 transition-colors duration-200">Gui-Center</span>
               <span className="text-xs text-gray-500 hidden sm:block group-hover:text-blue-500 transition-colors duration-200">Immobilier moderne</span>
             </div>
           </Link>
@@ -425,7 +425,7 @@ export function Header() {
                         <Home className="h-5 w-5 text-white" />
                       </div>
                       <div>
-                        <span className="font-bold text-lg text-gray-900">Gida-Center</span>
+                        <span className="font-bold text-lg text-gray-900">Gui-Center</span>
                         <p className="text-xs text-gray-500">Immobilier moderne</p>
                       </div>
                     </Link>

@@ -27,9 +27,9 @@ import { toast } from 'sonner';
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState({
-    siteName: 'Gida-Center',
+    siteName: 'Gui-Center',
     siteDescription: 'Plateforme immobilière moderne',
-    contactEmail: 'contact@Gida-Center.fr',
+    contactEmail: 'contact@Gui-Center.fr',
     supportPhone: '+33 1 23 45 67 89',
     currency: 'EUR',
     language: 'fr',
