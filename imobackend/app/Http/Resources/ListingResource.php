@@ -66,10 +66,25 @@ class ListingResource extends JsonResource
                     $coverPhoto = $this->photos->where('is_cover', true)->first();
                     return $coverPhoto ? [
                         'id' => $coverPhoto->id,
-                        'url' => $coverPhoto->getFullUrlAttribute(),
+                        'url' => $coverPhoto->full_url,
                         'width' => $coverPhoto->width,
                         'height' => $coverPhoto->height,
                     ] : null;
+                }
+            ),
+
+            // Toutes les photos
+            'photos' => $this->when(
+                $this->relationLoaded('photos'),
+                function () {
+                    return $this->photos->map(function ($photo) {
+                        return [
+                            'id' => $photo->id,
+                            'url' => $photo->full_url,
+                            'is_cover' => $photo->is_cover,
+                            'sort_order' => $photo->sort_order,
+                        ];
+                    });
                 }
             ),
 

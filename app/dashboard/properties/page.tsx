@@ -285,6 +285,7 @@ export default function MyPropertiesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Image</TableHead>
                   <TableHead>Propriété</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Prix</TableHead>
@@ -297,6 +298,21 @@ export default function MyPropertiesPage() {
               <TableBody>
                 {filteredListings.map((listing) => (
                   <TableRow key={listing.id}>
+                    <TableCell>
+                      <div className="w-16 h-16 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
+                        {listing.photos && listing.photos.length > 0 ? (
+                          <img
+                            src={listing.photos.find(photo => photo.is_cover)?.url || listing.photos[0]?.url}
+                            alt={listing.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="text-gray-400 text-xs text-center">
+                            Pas d'image
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <div>
                         <div className="font-medium">{listing.title}</div>
@@ -325,9 +341,9 @@ export default function MyPropertiesPage() {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        <div>{listing.metadata?.views_count || 0} vues</div>
-                        {listing.characteristics?.area_size && (
-                          <div>{listing.characteristics.area_size} {listing.characteristics.area_unit}</div>
+                        <div>{listing.views_count || 0} vues</div>
+                        {listing.area_size && (
+                          <div>{listing.area_size} {listing.area_unit}</div>
                         )}
                       </div>
                     </TableCell>

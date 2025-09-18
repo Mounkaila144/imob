@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
 import { listingsApi, CreateListingRequest } from '@/lib/api';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { toast } from 'sonner';
 
 const createListingSchema = z.object({
@@ -43,10 +44,18 @@ const createListingSchema = z.object({
 
 type CreateListingFormData = z.infer<typeof createListingSchema>;
 
+interface Photo {
+  id: number;
+  url: string;
+  is_cover: boolean;
+  sort_order: number;
+}
+
 export default function CreatePropertyPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [photos, setPhotos] = useState<Photo[]>([]);
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<CreateListingFormData>({
     resolver: zodResolver(createListingSchema),
@@ -91,7 +100,36 @@ export default function CreatePropertyPage() {
         lease_min_months: data.type === 'rent' ? data.lease_min_months : undefined,
       };
 
-      await listingsApi.createListing(listingData);
+      // Créer la propriété
+      const createdListing = await listingsApi.createListing(listingData);
+
+      // Uploader les photos si il y en a
+      if (photos.length > 0) {
+        // Convertir les URLs blob en fichiers pour l'upload
+        const photoFiles: File[] = [];
+        for (const photo of photos) {
+          if (photo.url.startsWith('blob:')) {
+            try {
+              const response = await fetch(photo.url);
+              const blob = await response.blob();
+              const file = new File([blob], `photo-${photo.id}.jpg`, { type: 'image/jpeg' });
+              photoFiles.push(file);
+            } catch (err) {
+              console.warn('Could not convert photo to file:', err);
+            }
+          }
+        }
+
+        if (photoFiles.length > 0) {
+          try {
+            await listingsApi.uploadPhotos(createdListing.id, photoFiles);
+          } catch (photoErr) {
+            console.warn('Photos upload failed:', photoErr);
+            toast.error('Propriété créée mais erreur lors de l\'upload des photos');
+          }
+        }
+      }
+
       toast.success('Propriété créée avec succès !');
       router.push('/dashboard/properties');
     } catch (err: any) {
@@ -455,6 +493,24 @@ export default function CreatePropertyPage() {
                 )}
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Photos */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Photos de la propriété</CardTitle>
+            <CardDescription>
+              Ajoutez des photos pour rendre votre annonce plus attractive
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ImageUpload
+              photos={photos}
+              onPhotosChange={setPhotos}
+              maxPhotos={10}
+              disabled={loading}
+            />
           </CardContent>
         </Card>
 

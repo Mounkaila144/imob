@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowLeft, Save, AlertCircle, Loader2 } from 'lucide-react';
 import { listingsApi, CreateListingRequest } from '@/lib/api';
 import { useSingleListing } from '@/hooks/useListings';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { toast } from 'sonner';
 
 const editListingSchema = z.object({
@@ -48,6 +49,13 @@ const editListingSchema = z.object({
 
 type EditListingFormData = z.infer<typeof editListingSchema>;
 
+interface Photo {
+  id: number;
+  url: string;
+  is_cover: boolean;
+  sort_order: number;
+}
+
 export default function EditPropertyPage() {
   const router = useRouter();
   const params = useParams();
@@ -55,6 +63,7 @@ export default function EditPropertyPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [photos, setPhotos] = useState<Photo[]>([]);
 
   const { listing, loading: fetchingListing, error: fetchError, refetch } = useSingleListing(listingId);
 
@@ -91,8 +100,32 @@ export default function EditPropertyPage() {
         deposit_amount: listing.price.deposit_amount || undefined,
         lease_min_months: listing.price.lease_min_months || undefined,
       });
+
+      // Charger les photos existantes
+      if (listing.photos) {
+        const formattedPhotos: Photo[] = listing.photos.map(photo => ({
+          id: photo.id,
+          url: photo.url,
+          is_cover: photo.is_cover,
+          sort_order: photo.sort_order,
+        }));
+        setPhotos(formattedPhotos);
+      }
     }
   }, [listing, reset]);
+
+  // Fonctions pour gérer les photos
+  const handlePhotoUpload = async (files: File[]) => {
+    return await listingsApi.uploadPhotos(listingId, files);
+  };
+
+  const handlePhotoDelete = async (photoId: number) => {
+    await listingsApi.deletePhoto(listingId, photoId);
+  };
+
+  const handleSetCoverPhoto = async (photoId: number) => {
+    await listingsApi.setCoverPhoto(listingId, photoId);
+  };
 
   const onSubmit = async (data: EditListingFormData) => {
     try {
@@ -528,6 +561,28 @@ export default function EditPropertyPage() {
                 )}
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Photos */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Photos de la propriété</CardTitle>
+            <CardDescription>
+              Gérez les photos de votre propriété
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ImageUpload
+              listingId={listingId}
+              photos={photos}
+              onPhotosChange={setPhotos}
+              onUpload={handlePhotoUpload}
+              onDelete={handlePhotoDelete}
+              onSetCover={handleSetCoverPhoto}
+              maxPhotos={10}
+              disabled={loading}
+            />
           </CardContent>
         </Card>
 

@@ -221,80 +221,69 @@ export default function ViewPropertyPage() {
           )}
 
           {/* Caractéristiques */}
-          {listing.characteristics && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Caractéristiques</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {listing.characteristics.area_size && (
-                    <div className="flex items-center space-x-2">
-                      <Ruler className="h-5 w-5 text-gray-400" />
-                      <div>
-                        <p className="font-medium">{listing.characteristics.area_size} {listing.characteristics.area_unit}</p>
-                        <p className="text-sm text-gray-600">Superficie</p>
-                      </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Caractéristiques</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {listing.area_size && (
+                  <div className="flex items-center space-x-2">
+                    <Ruler className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <p className="font-medium">{listing.area_size} {listing.area_unit}</p>
+                      <p className="text-sm text-gray-600">Superficie</p>
                     </div>
-                  )}
-                  {listing.characteristics.rooms && (
-                    <div className="flex items-center space-x-2">
-                      <Home className="h-5 w-5 text-gray-400" />
-                      <div>
-                        <p className="font-medium">{listing.characteristics.rooms}</p>
-                        <p className="text-sm text-gray-600">Pièces</p>
-                      </div>
+                  </div>
+                )}
+                {listing.rooms && (
+                  <div className="flex items-center space-x-2">
+                    <Home className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <p className="font-medium">{listing.rooms}</p>
+                      <p className="text-sm text-gray-600">Pièces</p>
                     </div>
-                  )}
-                  {listing.characteristics.bedrooms && (
-                    <div className="flex items-center space-x-2">
-                      <Bed className="h-5 w-5 text-gray-400" />
-                      <div>
-                        <p className="font-medium">{listing.characteristics.bedrooms}</p>
-                        <p className="text-sm text-gray-600">Chambres</p>
-                      </div>
+                  </div>
+                )}
+                {listing.bedrooms && (
+                  <div className="flex items-center space-x-2">
+                    <Bed className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <p className="font-medium">{listing.bedrooms}</p>
+                      <p className="text-sm text-gray-600">Chambres</p>
                     </div>
-                  )}
-                  {listing.characteristics.bathrooms && (
-                    <div className="flex items-center space-x-2">
-                      <Bath className="h-5 w-5 text-gray-400" />
-                      <div>
-                        <p className="font-medium">{listing.characteristics.bathrooms}</p>
-                        <p className="text-sm text-gray-600">Salles de bain</p>
-                      </div>
+                  </div>
+                )}
+                {listing.bathrooms && (
+                  <div className="flex items-center space-x-2">
+                    <Bath className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <p className="font-medium">{listing.bathrooms}</p>
+                      <p className="text-sm text-gray-600">Salles de bain</p>
                     </div>
-                  )}
-                  {listing.characteristics.parking_spaces && (
-                    <div className="flex items-center space-x-2">
-                      <Car className="h-5 w-5 text-gray-400" />
-                      <div>
-                        <p className="font-medium">{listing.characteristics.parking_spaces}</p>
-                        <p className="text-sm text-gray-600">Parking</p>
-                      </div>
+                  </div>
+                )}
+                {listing.parking_spaces && (
+                  <div className="flex items-center space-x-2">
+                    <Car className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <p className="font-medium">{listing.parking_spaces}</p>
+                      <p className="text-sm text-gray-600">Parking</p>
                     </div>
-                  )}
-                  {listing.characteristics.floor && (
-                    <div className="flex items-center space-x-2">
-                      <Home className="h-5 w-5 text-gray-400" />
-                      <div>
-                        <p className="font-medium">{listing.characteristics.floor}</p>
-                        <p className="text-sm text-gray-600">Étage</p>
-                      </div>
+                  </div>
+                )}
+                {listing.floor && (
+                  <div className="flex items-center space-x-2">
+                    <Home className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <p className="font-medium">{listing.floor}</p>
+                      <p className="text-sm text-gray-600">Étage</p>
                     </div>
-                  )}
-                  {listing.characteristics.year_built && (
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="h-5 w-5 text-gray-400" />
-                      <div>
-                        <p className="font-medium">{listing.characteristics.year_built}</p>
-                        <p className="text-sm text-gray-600">Année</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Sidebar */}
@@ -334,7 +323,7 @@ export default function ViewPropertyPage() {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Vues</span>
-                  <span className="font-medium">{listing.metadata?.views_count || 0}</span>
+                  <span className="font-medium">{listing.views_count || 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Créé le</span>

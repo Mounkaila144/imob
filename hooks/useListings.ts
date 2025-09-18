@@ -127,11 +127,11 @@ export function useListingStats(listings: ListingResponse[]): ListingStats {
 
   return {
     totalListings: listings.length,
-    totalViews: listings.reduce((sum, listing) => sum + (listing.metadata?.views_count || 0), 0),
+    totalViews: listings.reduce((sum, listing) => sum + (listing.views_count || 0), 0),
     totalMessages: 0, // Cette donnée n'est pas disponible dans l'API actuelle
     totalFavorites: 0, // Cette donnée n'est pas disponible dans l'API actuelle
     averageViews: listings.length > 0
-      ? listings.reduce((sum, listing) => sum + (listing.metadata?.views_count || 0), 0) / listings.length
+      ? listings.reduce((sum, listing) => sum + (listing.views_count || 0), 0) / listings.length
       : 0,
   };
 }

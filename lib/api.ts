@@ -132,16 +132,14 @@ interface ListingResponse {
     deposit_amount?: number;
     lease_min_months?: number;
   };
-  characteristics?: {
-    area_size: number;
-    area_unit: string;
-    rooms?: number;
-    bedrooms?: number;
-    bathrooms?: number;
-    parking_spaces?: number;
-    floor?: number;
-    year_built?: number;
-  };
+  area_size?: number;
+  area_unit?: string;
+  rooms?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  parking_spaces?: number;
+  floor?: number;
+  year_built?: number;
   location: {
     address_line1: string;
     city: string;
@@ -152,8 +150,8 @@ interface ListingResponse {
     };
     full_address?: string;
   };
+  views_count?: number;
   metadata?: {
-    views_count: number;
     features?: string[];
     is_favorite?: boolean;
   };
@@ -388,6 +386,58 @@ export const listingsApi = {
   async deleteListing(id: number): Promise<void> {
     return apiRequest(`/listings/${id}`, {
       method: 'DELETE',
+    });
+  },
+
+  // Upload des photos
+  async uploadPhotos(listingId: number, photos: File[]): Promise<any> {
+    const formData = new FormData();
+    photos.forEach((photo, index) => {
+      formData.append(`photos[${index}]`, photo);
+    });
+
+    const token = localStorage.getItem('auth_token');
+    const response = await fetch(`${API_BASE_URL}/listings/${listingId}/photos`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new ApiError(
+        data.message || 'Erreur lors de l\'upload',
+        response.status,
+        data.errors
+      );
+    }
+
+    return data.data;
+  },
+
+  // Supprimer une photo
+  async deletePhoto(listingId: number, photoId: number): Promise<void> {
+    return apiRequest(`/listings/${listingId}/photos/${photoId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Définir photo de couverture
+  async setCoverPhoto(listingId: number, photoId: number): Promise<void> {
+    return apiRequest(`/listings/${listingId}/photos/${photoId}/cover`, {
+      method: 'PUT',
+    });
+  },
+
+  // Réorganiser les photos
+  async reorderPhotos(listingId: number, photos: Array<{id: number; sort_order: number}>): Promise<void> {
+    return apiRequest(`/listings/${listingId}/photos/reorder`, {
+      method: 'PUT',
+      body: JSON.stringify({ photos }),
     });
   },
 };

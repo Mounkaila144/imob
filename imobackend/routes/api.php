@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ListingController;
+use App\Http\Controllers\ListingPhotoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -49,6 +50,12 @@ Route::middleware(['auth:api', 'active.user'])->group(function () {
         Route::put('listings/{listing}', [ListingController::class, 'update']);
         Route::delete('listings/{listing}', [ListingController::class, 'destroy']);
         Route::get('my-listings', [ListingController::class, 'myListings']);
+
+        // Photo management routes
+        Route::post('listings/{listing}/photos', [ListingPhotoController::class, 'store']);
+        Route::delete('listings/{listing}/photos/{photo}', [ListingPhotoController::class, 'destroy']);
+        Route::put('listings/{listing}/photos/{photo}/cover', [ListingPhotoController::class, 'setCover']);
+        Route::put('listings/{listing}/photos/reorder', [ListingPhotoController::class, 'reorder']);
     });
 
     // Client routes
