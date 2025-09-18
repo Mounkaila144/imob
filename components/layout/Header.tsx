@@ -48,15 +48,26 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Simple active link detection
+  // Enhanced active link detection
   const isActiveLink = (href: string) => {
     if (typeof window === 'undefined') return false;
     const currentPath = window.location.pathname;
     const currentSearch = window.location.search;
+    const currentUrl = currentPath + currentSearch;
 
-    if (href.includes('?')) {
-      return (currentPath + currentSearch) === href;
+    // Page d'accueil exacte
+    if (href === '/' && currentPath === '/' && !currentSearch) {
+      return true;
     }
+
+    // Comparaison exacte pour les liens avec paramètres
+    if (href.includes('?')) {
+      return currentUrl === href;
+    }
+
+    // Pour les liens sans paramètres, vérifier si l'URL courante contient les bons paramètres
+    if (href === '/' && currentPath === '/') return false; // Éviter que "/" soit actif quand il y a des paramètres
+
     return currentPath === href;
   };
 
@@ -74,63 +85,63 @@ export function Header() {
           description: 'Voir tous les biens disponibles'
         },
         {
-          href: '/?transactionType=sale',
+          href: '/?type=sale',
           label: 'À vendre',
           description: 'Biens en vente'
         },
         {
-          href: '/?transactionType=rent',
+          href: '/?type=rent',
           label: 'À louer',
           description: 'Biens en location'
         }
       ]
     },
     {
-      href: '/?transactionType=sale',
+      href: '/?type=sale',
       label: 'Acheter',
       icon: Home,
       description: 'Biens à vendre',
       subItems: [
         {
-          href: '/?transactionType=sale&type=house',
+          href: '/?type=sale&property_type=house',
           label: 'Maisons',
           description: 'Maisons à vendre'
         },
         {
-          href: '/?transactionType=sale&type=apartment',
+          href: '/?type=sale&property_type=apartment',
           label: 'Appartements',
           description: 'Appartements à vendre'
         },
         {
-          href: '/?transactionType=sale&type=office',
+          href: '/?type=sale&property_type=office',
           label: 'Bureaux',
           description: 'Espaces professionnels'
         },
         {
-          href: '/?transactionType=sale&type=land',
+          href: '/?type=sale&property_type=land',
           label: 'Terrains',
           description: 'Terrains à bâtir'
         }
       ]
     },
     {
-      href: '/?transactionType=rent',
+      href: '/?type=rent',
       label: 'Louer',
       icon: Building,
       description: 'Biens à louer',
       subItems: [
         {
-          href: '/?transactionType=rent&type=house',
+          href: '/?type=rent&property_type=house',
           label: 'Maisons',
           description: 'Maisons à louer'
         },
         {
-          href: '/?transactionType=rent&type=apartment',
+          href: '/?type=rent&property_type=apartment',
           label: 'Appartements',
           description: 'Appartements à louer'
         },
         {
-          href: '/?transactionType=rent&type=office',
+          href: '/?type=rent&property_type=office',
           label: 'Bureaux',
           description: 'Bureaux à louer'
         }
