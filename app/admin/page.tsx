@@ -60,7 +60,7 @@ export default function AdminDashboard() {
     },
     {
       title: 'Revenus Mensuels',
-      value: '€24,500',
+      value: 'CFA24,500',
       description: '+15% ce mois',
       icon: TrendingUp,
       color: 'text-purple-600',

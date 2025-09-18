@@ -107,7 +107,7 @@ export default function FinancementPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="amount">Montant souhaité (€)</Label>
+                    <Label htmlFor="amount">Montant souhaité (CFA)</Label>
                     <Input
                       id="amount"
                       type="number"
@@ -133,7 +133,7 @@ export default function FinancementPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="income">Revenus mensuels (€)</Label>
+                    <Label htmlFor="income">Revenus mensuels (CFA)</Label>
                     <Input
                       id="income"
                       type="number"
@@ -144,7 +144,7 @@ export default function FinancementPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="contribution">Apport personnel (€)</Label>
+                    <Label htmlFor="contribution">Apport personnel (CFA)</Label>
                     <Input
                       id="contribution"
                       type="number"
@@ -173,7 +173,7 @@ export default function FinancementPage() {
                     <div className="space-y-4">
                       <div className="p-4 bg-purple-50 rounded-lg">
                         <div className="text-2xl font-bold text-purple-600 mb-1">
-                          {simulation.monthlyPayment.toLocaleString()} €/mois
+                          {simulation.monthlyPayment.toLocaleString()} CFA/mois
                         </div>
                         <div className="text-sm text-gray-600">Mensualité estimée</div>
                       </div>
@@ -185,7 +185,7 @@ export default function FinancementPage() {
                         </div>
                         <div className="text-center p-3 bg-gray-50 rounded-lg">
                           <div className="font-semibold text-lg">
-                            {simulation.totalCost.toLocaleString()} €
+                            {simulation.totalCost.toLocaleString()} CFA
                           </div>
                           <div className="text-sm text-gray-600">Coût total</div>
                         </div>

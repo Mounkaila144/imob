@@ -528,7 +528,7 @@ curl -X GET "$API_BASE/my-listings?status=published&per_page=10" \
       "price": {
         "amount": 2500,
         "currency": "EUR",
-        "formatted": "2 500 €",
+        "formatted": "2 500 CFA",
         "rent_period": "monthly"
       },
       "area_size": 75.5,

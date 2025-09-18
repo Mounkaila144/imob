@@ -162,7 +162,7 @@ class ListingDetailResource extends JsonResource
     private function formatPrice(): string
     {
         $symbol = match($this->currency) {
-            'EUR' => '€',
+            'EUR' => 'CFA',
             'USD' => '$',
             'GBP' => '£',
             default => $this->currency

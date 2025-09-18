@@ -264,7 +264,7 @@ GET /api/listings?type=rent&city=Paris&min_price=2000&max_price=3000&per_page=20
       "price": {
         "amount": 2500,
         "currency": "EUR",
-        "formatted": "2 500 €",
+        "formatted": "2 500 CFA",
         "rent_period": "monthly"
       },
       "area_size": 75.5,
@@ -322,7 +322,7 @@ GET /api/listings/{id}
     "price": {
       "amount": 2500,
       "currency": "EUR",
-      "formatted": "2 500 €/mois",
+      "formatted": "2 500 CFA/mois",
       "rent_period": "monthly",
       "deposit_amount": 5000,
       "lease_min_months": 12

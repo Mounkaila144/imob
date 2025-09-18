@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-EstateHub is a French real estate platform ("Plateforme Immobilière Moderne") built with Next.js 13.5.1, TypeScript, and Tailwind CSS. The application allows users to browse, search, and filter property listings for both sale and rental.
+Gida-Center is a French real estate platform ("Plateforme Immobilière Moderne") built with Next.js 13.5.1, TypeScript, and Tailwind CSS. The application allows users to browse, search, and filter property listings for both sale and rental.
 
 ## Development Commands
 

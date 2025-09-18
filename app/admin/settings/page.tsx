@@ -27,9 +27,9 @@ import { toast } from 'sonner';
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState({
-    siteName: 'EstateHub',
+    siteName: 'Gida-Center',
     siteDescription: 'Plateforme immobilière moderne',
-    contactEmail: 'contact@estatehub.fr',
+    contactEmail: 'contact@Gida-Center.fr',
     supportPhone: '+33 1 23 45 67 89',
     currency: 'EUR',
     language: 'fr',
@@ -137,7 +137,7 @@ export default function AdminSettingsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="EUR">Euro (€)</SelectItem>
+                    <SelectItem value="EUR">Euro (CFA)</SelectItem>
                     <SelectItem value="USD">Dollar US ($)</SelectItem>
                     <SelectItem value="GBP">Livre Sterling (£)</SelectItem>
                   </SelectContent>
@@ -215,7 +215,7 @@ export default function AdminSettingsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="featuredPrice">Prix annonce mise en avant (€)</Label>
+                <Label htmlFor="featuredPrice">Prix annonce mise en avant (CFA)</Label>
                 <Input
                   id="featuredPrice"
                   type="number"

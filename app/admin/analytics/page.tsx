@@ -20,7 +20,7 @@ export default function AdminAnalyticsPage() {
   const stats = [
     {
       title: 'Revenus ce mois',
-      value: '€24,500',
+      value: 'CFA24,500',
       change: '+12%',
       trend: 'up',
       icon: Euro,

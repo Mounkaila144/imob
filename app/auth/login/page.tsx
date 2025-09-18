@@ -42,14 +42,14 @@ export default function LoginPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <Link href="/" className="flex items-center justify-center space-x-2 mb-6">
           <Home className="h-8 w-8 text-blue-600" />
-          <span className="font-bold text-2xl">EstateHub</span>
+          <span className="font-bold text-2xl">Gida-Center</span>
         </Link>
 
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Se connecter</CardTitle>
             <CardDescription>
-              Accédez à votre compte EstateHub
+              Accédez à votre compte Gida-Center
             </CardDescription>
           </CardHeader>
 

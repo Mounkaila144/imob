@@ -71,7 +71,7 @@ export default function ListerDashboard() {
     },
     {
       title: 'Revenus Estimés',
-      value: '€8,420',
+      value: 'CFA8,420',
       description: '+22% ce mois',
       icon: DollarSign,
       color: 'text-purple-600',
@@ -118,7 +118,7 @@ export default function ListerDashboard() {
     {
       id: 1,
       title: 'Appartement moderne à Paris',
-      price: '€450,000',
+      price: 'CFA450,000',
       status: 'active',
       views: 234,
       messages: 5,
@@ -126,7 +126,7 @@ export default function ListerDashboard() {
     {
       id: 2,
       title: 'Maison avec jardin à Lyon',
-      price: '€320,000',
+      price: 'CFA320,000',
       status: 'pending',
       views: 156,
       messages: 2,
@@ -134,7 +134,7 @@ export default function ListerDashboard() {
     {
       id: 3,
       title: 'Studio meublé centre-ville',
-      price: '€850/mois',
+      price: 'CFA850/mois',
       status: 'active',
       views: 89,
       messages: 8,

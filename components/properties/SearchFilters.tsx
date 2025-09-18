@@ -142,7 +142,7 @@ export function SearchFilters({ onFiltersChange, initialFilters = {} }: SearchFi
 
           {/* Price Range */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Prix (€)</Label>
+            <Label className="text-sm font-medium">Prix (CFA)</Label>
             <div className="grid grid-cols-2 gap-2">
               <Input
                 type="number"
