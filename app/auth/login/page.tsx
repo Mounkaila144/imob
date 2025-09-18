@@ -30,7 +30,7 @@ export default function LoginPage() {
       setError('');
       await login(data.email, data.password);
       toast.success('Connexion réussie !');
-      router.push('/');
+      // La redirection se fait automatiquement dans useAuth selon le rôle
     } catch (err) {
       setError('Email ou mot de passe incorrect');
       toast.error('Échec de la connexion');

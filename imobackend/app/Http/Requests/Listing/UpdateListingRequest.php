@@ -9,10 +9,16 @@ class UpdateListingRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $listing = $this->route('listing');
-        $user = auth()->user();
+        // Utiliser explicitement le guard API/JWT
+        $user = auth('api')->user();
 
-        return $user && ($user->isAdmin() || $listing->user_id === $user->id);
+        if (!$user || !is_object($user)) {
+            return false;
+        }
+
+        // Autoriser si c'est un admin ou un lister (la vérification de propriété se fait dans le contrôleur)
+        return (method_exists($user, 'isAdmin') && $user->isAdmin()) ||
+               (method_exists($user, 'isLister') && $user->isLister());
     }
 
     public function rules(): array
@@ -116,7 +122,9 @@ class UpdateListingRequest extends FormRequest
             }
 
             // Seuls les admins peuvent modifier le statut
-            if ($this->has('status') && !auth()->user()->isAdmin()) {
+            $user = auth('api')->user();
+            if ($this->has('status') &&
+                (!$user || !is_object($user) || !method_exists($user, 'isAdmin') || !$user->isAdmin())) {
                 $validator->errors()->add('status', 'Seuls les administrateurs peuvent modifier le statut.');
             }
         });

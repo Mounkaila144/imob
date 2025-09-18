@@ -9,7 +9,13 @@ class CreateListingRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->check() && (auth()->user()->isLister() || auth()->user()->isAdmin());
+        $user = auth('api')->user();
+
+        return auth('api')->check() &&
+               $user &&
+               is_object($user) &&
+               ((method_exists($user, 'isLister') && $user->isLister()) ||
+                (method_exists($user, 'isAdmin') && $user->isAdmin()));
     }
 
     public function rules(): array

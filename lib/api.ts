@@ -115,6 +115,117 @@ async function apiRequest<T>(
   }
 }
 
+// Types pour les listings
+interface ListingResponse {
+  id: number;
+  title: string;
+  description?: string;
+  slug: string;
+  type: 'sale' | 'rent';
+  property_type: 'apartment' | 'house' | 'villa' | 'land' | 'office' | 'shop' | 'warehouse' | 'other';
+  status: 'published' | 'draft' | 'pending' | 'suspended' | 'sold' | 'rented';
+  price: {
+    amount: number;
+    currency: string;
+    formatted: string;
+    rent_period?: string;
+    deposit_amount?: number;
+    lease_min_months?: number;
+  };
+  characteristics?: {
+    area_size: number;
+    area_unit: string;
+    rooms?: number;
+    bedrooms?: number;
+    bathrooms?: number;
+    parking_spaces?: number;
+    floor?: number;
+    year_built?: number;
+  };
+  location: {
+    address_line1: string;
+    city: string;
+    postal_code: string;
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
+    full_address?: string;
+  };
+  metadata?: {
+    views_count: number;
+    features?: string[];
+    is_favorite?: boolean;
+  };
+  photos?: {
+    id: number;
+    url: string;
+    is_cover: boolean;
+    sort_order: number;
+  }[];
+  owner: {
+    id: number;
+    name: string;
+    phone?: string;
+    company?: string;
+    role: string;
+    member_since?: string;
+  };
+  amenities?: {
+    id: number;
+    code: string;
+    label: string;
+  }[];
+  permissions?: {
+    can_edit: boolean;
+    can_delete: boolean;
+    can_contact: boolean;
+    can_favorite: boolean;
+  };
+  created_at: string;
+  updated_at?: string;
+}
+
+interface PaginatedListingResponse {
+  data: ListingResponse[];
+  pagination: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    has_more_pages: boolean;
+  };
+}
+
+interface CreateListingRequest {
+  title: string;
+  description: string;
+  type: 'sale' | 'rent';
+  property_type: 'apartment' | 'house' | 'villa' | 'land' | 'office' | 'shop' | 'warehouse' | 'other';
+  price: number;
+  currency?: string;
+  rent_period?: string;
+  deposit_amount?: number;
+  lease_min_months?: number;
+  area_size?: number;
+  area_unit?: string;
+  rooms?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  parking_spaces?: number;
+  floor?: number;
+  year_built?: number;
+  address_line1: string;
+  city: string;
+  postal_code?: string;
+  country_code?: string;
+  latitude: number;
+  longitude: number;
+  available_from?: string;
+  amenity_ids?: number[];
+  features?: string[];
+}
+
 export const authApi = {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     const response = await apiRequest<LoginResponse>('/auth/login', {
@@ -184,5 +295,110 @@ export const authApi = {
   },
 };
 
+export const listingsApi = {
+  // Récupérer toutes les annonces publiques
+  async getPublicListings(params?: {
+    type?: 'sale' | 'rent';
+    property_type?: string;
+    city?: string;
+    min_price?: number;
+    max_price?: number;
+    rooms?: number;
+    bedrooms?: number;
+    search?: string;
+    sort_by?: string;
+    sort_order?: 'asc' | 'desc';
+    per_page?: number;
+    page?: number;
+  }): Promise<PaginatedListingResponse> {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+
+    const endpoint = queryParams.toString() ? `/listings?${queryParams.toString()}` : '/listings';
+    return apiRequest<PaginatedListingResponse>(endpoint);
+  },
+
+  // Récupérer les annonces du lister connecté
+  async getMyListings(params?: {
+    status?: string;
+    type?: 'sale' | 'rent';
+    sort_by?: string;
+    sort_order?: 'asc' | 'desc';
+    per_page?: number;
+    page?: number;
+  }): Promise<PaginatedListingResponse> {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+
+    const endpoint = queryParams.toString() ? `/my-listings?${queryParams.toString()}` : '/my-listings';
+    const response = await apiRequest<any>(endpoint);
+
+    // Si l'API retourne directement un tableau, on le structure correctement
+    if (Array.isArray(response)) {
+      const paginatedResponse: PaginatedListingResponse = {
+        data: response,
+        pagination: {
+          current_page: 1,
+          last_page: 1,
+          per_page: response.length,
+          total: response.length,
+          has_more_pages: false,
+        }
+      };
+      return paginatedResponse;
+    }
+
+    return response as PaginatedListingResponse;
+  },
+
+  // Récupérer une annonce spécifique
+  async getListing(id: number): Promise<ListingResponse> {
+    return apiRequest<ListingResponse>(`/listings/${id}`);
+  },
+
+  // Créer une nouvelle annonce
+  async createListing(listingData: CreateListingRequest): Promise<ListingResponse> {
+    return apiRequest<ListingResponse>('/listings', {
+      method: 'POST',
+      body: JSON.stringify(listingData),
+    });
+  },
+
+  // Modifier une annonce
+  async updateListing(id: number, listingData: Partial<CreateListingRequest>): Promise<ListingResponse> {
+    return apiRequest<ListingResponse>(`/listings/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(listingData),
+    });
+  },
+
+  // Supprimer une annonce
+  async deleteListing(id: number): Promise<void> {
+    return apiRequest(`/listings/${id}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
 export { ApiError };
-export type { ApiResponse, LoginRequest, LoginResponse, RegisterRequest };
+export type {
+  ApiResponse,
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  ListingResponse,
+  PaginatedListingResponse,
+  CreateListingRequest
+};

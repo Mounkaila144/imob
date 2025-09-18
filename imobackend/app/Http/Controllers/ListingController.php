@@ -96,7 +96,7 @@ class ListingController extends ApiController
      */
     public function store(CreateListingRequest $request): JsonResponse
     {
-        $user = auth()->user();
+        $user = auth('api')->user();
 
         // Vérifier que l'utilisateur peut créer des annonces
         if (!$user->isLister() && !$user->isAdmin()) {
@@ -153,8 +153,8 @@ class ListingController extends ApiController
         }
 
         // Log de consultation
-        if (auth()->check()) {
-            ActivityLog::log('listing_viewed', $listing, auth()->user(), [
+        if (auth('api')->check()) {
+            ActivityLog::log('listing_viewed', $listing, auth('api')->user(), [
                 'property_type' => $listing->property_type,
                 'city' => $listing->city
             ]);
@@ -172,7 +172,7 @@ class ListingController extends ApiController
     public function update(UpdateListingRequest $request, string $id): JsonResponse
     {
         $listing = Listing::findOrFail($id);
-        $user = auth()->user();
+        $user = auth('api')->user();
 
         // Vérifier les permissions
         if (!$user->isAdmin() && $listing->user_id !== $user->id) {
@@ -224,7 +224,7 @@ class ListingController extends ApiController
     public function destroy(string $id): JsonResponse
     {
         $listing = Listing::findOrFail($id);
-        $user = auth()->user();
+        $user = auth('api')->user();
 
         // Vérifier les permissions
         if (!$user->isAdmin() && $listing->user_id !== $user->id) {
@@ -252,7 +252,7 @@ class ListingController extends ApiController
      */
     public function myListings(Request $request): JsonResponse
     {
-        $user = auth()->user();
+        $user = auth('api')->user();
 
         $query = $user->listings()
             ->with(['photos', 'amenities'])

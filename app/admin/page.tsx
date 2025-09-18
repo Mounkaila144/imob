@@ -28,10 +28,10 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement...</p>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-300">Chargement...</p>
         </div>
       </div>
     );
@@ -104,25 +104,25 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-900">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-gray-800 shadow-sm border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-3xl font-bold text-white">
                 Tableau de Bord Admin
               </h1>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-400">
                 Bienvenue, {user.name}
               </p>
             </div>
             <div className="flex space-x-3">
-              <Button variant="outline" onClick={() => router.push('/')}>
+              <Button variant="outline" onClick={() => router.push('/')} className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white">
                 <Eye className="h-4 w-4 mr-2" />
                 Voir le Site
               </Button>
-              <Button>
+              <Button className="bg-blue-600 hover:bg-blue-700">
                 <Plus className="h-4 w-4 mr-2" />
                 Nouveau
               </Button>
@@ -137,17 +137,17 @@ export default function AdminDashboard() {
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <Card key={index}>
+              <Card key={index} className="bg-gray-800 border-gray-700">
                 <CardContent className="p-6">
                   <div className="flex items-center">
                     <div className={`${stat.bgColor} p-3 rounded-lg`}>
                       <Icon className={`h-6 w-6 ${stat.color}`} />
                     </div>
                     <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">
+                      <p className="text-sm font-medium text-gray-400">
                         {stat.title}
                       </p>
-                      <p className="text-2xl font-bold text-gray-900">
+                      <p className="text-2xl font-bold text-white">
                         {stat.value}
                       </p>
                       <p className="text-xs text-gray-500">
@@ -163,28 +163,28 @@ export default function AdminDashboard() {
 
         {/* Quick Actions */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">
+          <h2 className="text-xl font-semibold text-white mb-6">
             Actions Rapides
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {quickActions.map((action, index) => {
               const Icon = action.icon;
               return (
-                <Card key={index} className="cursor-pointer hover:shadow-lg transition-shadow">
+                <Card key={index} className="cursor-pointer hover:shadow-lg transition-shadow bg-gray-800 border-gray-700 hover:bg-gray-750">
                   <CardHeader
                     className="pb-2"
                     onClick={action.action}
                   >
                     <div className="flex items-center space-x-2">
-                      <Icon className="h-5 w-5 text-blue-600" />
-                      <CardTitle className="text-lg">{action.title}</CardTitle>
+                      <Icon className="h-5 w-5 text-blue-400" />
+                      <CardTitle className="text-lg text-white">{action.title}</CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent
                     className="pt-0 cursor-pointer"
                     onClick={action.action}
                   >
-                    <CardDescription>{action.description}</CardDescription>
+                    <CardDescription className="text-gray-400">{action.description}</CardDescription>
                   </CardContent>
                 </Card>
               );
@@ -194,10 +194,10 @@ export default function AdminDashboard() {
 
         {/* Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
+          <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
-              <CardTitle>Activité Récente</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-white">Activité Récente</CardTitle>
+              <CardDescription className="text-gray-400">
                 Dernières actions sur la plateforme
               </CardDescription>
             </CardHeader>
@@ -206,28 +206,28 @@ export default function AdminDashboard() {
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium">Nouveau utilisateur inscrit</p>
+                    <p className="text-sm font-medium text-gray-200">Nouveau utilisateur inscrit</p>
                     <p className="text-xs text-gray-500">Il y a 5 minutes</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium">Propriété publiée</p>
+                    <p className="text-sm font-medium text-gray-200">Propriété publiée</p>
                     <p className="text-xs text-gray-500">Il y a 12 minutes</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium">Demande de visite</p>
+                    <p className="text-sm font-medium text-gray-200">Demande de visite</p>
                     <p className="text-xs text-gray-500">Il y a 30 minutes</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium">Paiement traité</p>
+                    <p className="text-sm font-medium text-gray-200">Paiement traité</p>
                     <p className="text-xs text-gray-500">Il y a 1 heure</p>
                   </div>
                 </div>
@@ -235,36 +235,36 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
-              <CardTitle>Statistiques Rapides</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-white">Statistiques Rapides</CardTitle>
+              <CardDescription className="text-gray-400">
                 Aperçu des performances
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Taux de conversion</span>
-                  <span className="text-sm font-medium">3.2%</span>
+                  <span className="text-sm text-gray-400">Taux de conversion</span>
+                  <span className="text-sm font-medium text-gray-200">3.2%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-gray-700 rounded-full h-2">
                   <div className="bg-blue-600 h-2 rounded-full" style={{ width: '32%' }}></div>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Satisfaction utilisateur</span>
-                  <span className="text-sm font-medium">4.8/5</span>
+                  <span className="text-sm text-gray-400">Satisfaction utilisateur</span>
+                  <span className="text-sm font-medium text-gray-200">4.8/5</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-gray-700 rounded-full h-2">
                   <div className="bg-green-600 h-2 rounded-full" style={{ width: '96%' }}></div>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Temps de réponse moyen</span>
-                  <span className="text-sm font-medium">2.1h</span>
+                  <span className="text-sm text-gray-400">Temps de réponse moyen</span>
+                  <span className="text-sm font-medium text-gray-200">2.1h</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-gray-700 rounded-full h-2">
                   <div className="bg-yellow-600 h-2 rounded-full" style={{ width: '78%' }}></div>
                 </div>
               </div>

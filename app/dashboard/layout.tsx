@@ -7,11 +7,12 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard,
-  Users,
   Home,
+  Plus,
+  MessageSquare,
+  Calendar,
   BarChart3,
   Settings,
-  MessageSquare,
   LogOut,
   Menu,
   X,
@@ -19,17 +20,17 @@ import {
   User
 } from 'lucide-react';
 
-interface AdminLayoutProps {
+interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-export default function AdminLayout({ children }: AdminLayoutProps) {
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (!loading && (!user || user.role !== 'admin')) {
+    if (!loading && (!user || user.role !== 'lister')) {
       router.push('/');
     }
   }, [user, loading, router]);
@@ -54,49 +55,54 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
-  if (!user || user.role !== 'admin') {
+  if (!user || user.role !== 'lister') {
     return null;
   }
 
   const navigation = [
     {
       name: 'Tableau de Bord',
-      href: '/admin',
+      href: '/dashboard',
       icon: LayoutDashboard,
     },
     {
-      name: 'Utilisateurs',
-      href: '/admin/users',
-      icon: Users,
-    },
-    {
-      name: 'Propriétés',
-      href: '/admin/properties',
+      name: 'Mes Propriétés',
+      href: '/dashboard/properties',
       icon: Home,
     },
     {
+      name: 'Nouvelle Propriété',
+      href: '/dashboard/properties/create',
+      icon: Plus,
+    },
+    {
       name: 'Messages',
-      href: '/admin/messages',
+      href: '/dashboard/messages',
       icon: MessageSquare,
     },
     {
-      name: 'Analytics',
-      href: '/admin/analytics',
+      name: 'Rendez-vous',
+      href: '/dashboard/appointments',
+      icon: Calendar,
+    },
+    {
+      name: 'Statistiques',
+      href: '/dashboard/analytics',
       icon: BarChart3,
     },
     {
       name: 'Paramètres',
-      href: '/admin/settings',
+      href: '/dashboard/settings',
       icon: Settings,
     },
   ];
 
   return (
-    <div className="h-screen flex overflow-hidden bg-gray-900">
+    <div className="h-screen flex overflow-hidden bg-gray-100">
       {/* Mobile sidebar */}
       <div className={`fixed inset-0 flex z-40 md:hidden ${sidebarOpen ? '' : 'hidden'}`}>
-        <div className="fixed inset-0 bg-black bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-        <div className="relative flex-1 flex flex-col max-w-xs w-full bg-gray-800">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
+        <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white">
           <div className="absolute top-0 right-0 -mr-12 pt-2">
             <button
               type="button"
@@ -108,7 +114,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </div>
           <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
             <div className="flex-shrink-0 flex items-center px-4">
-              <h1 className="text-xl font-bold text-white">Admin EstateHub</h1>
+              <h1 className="text-xl font-bold text-gray-900">EstateHub Pro</h1>
             </div>
             <nav className="mt-5 px-2 space-y-1">
               {navigation.map((item) => {
@@ -117,7 +123,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="group flex items-center px-2 py-2 text-base font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white"
+                    className="group flex items-center px-2 py-2 text-base font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     onClick={() => setSidebarOpen(false)}
                   >
                     <Icon className="mr-4 h-6 w-6" />
@@ -133,19 +139,19 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {/* Desktop sidebar */}
       <div className="hidden md:flex md:flex-shrink-0">
         <div className="flex flex-col w-64">
-          <div className="flex flex-col h-0 flex-1 border-r border-gray-700 bg-gray-800">
+          <div className="flex flex-col h-0 flex-1 border-r border-gray-200 bg-white">
             <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
               <div className="flex items-center flex-shrink-0 px-4">
-                <h1 className="text-xl font-bold text-white">Admin EstateHub</h1>
+                <h1 className="text-xl font-bold text-gray-900">EstateHub Pro</h1>
               </div>
-              <nav className="mt-5 flex-1 px-2 bg-gray-800 space-y-1">
+              <nav className="mt-5 flex-1 px-2 bg-white space-y-1">
                 {navigation.map((item) => {
                   const Icon = item.icon;
                   return (
                     <Link
                       key={item.name}
                       href={item.href}
-                      className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white"
+                      className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     >
                       <Icon className="mr-3 h-5 w-5" />
                       {item.name}
@@ -154,15 +160,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 })}
               </nav>
             </div>
-            <div className="flex-shrink-0 flex border-t border-gray-700 p-4">
+            <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
               <div className="flex-shrink-0 w-full group block">
                 <div className="flex items-center">
                   <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-200 group-hover:text-white">
+                    <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
                       {user.name}
                     </p>
-                    <p className="text-xs font-medium text-gray-400 group-hover:text-gray-300">
-                      Administrateur
+                    <p className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
+                      Agent Immobilier
                     </p>
                   </div>
                 </div>
@@ -177,7 +183,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="md:hidden pl-1 pt-1 sm:pl-3 sm:pt-3">
           <button
             type="button"
-            className="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-400 hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+            className="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu className="h-6 w-6" />
@@ -185,7 +191,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
 
         {/* Top navigation */}
-        <div className="relative z-10 flex-shrink-0 flex h-16 bg-gray-800 shadow-lg border-b border-gray-700">
+        <div className="relative z-10 flex-shrink-0 flex h-16 bg-white shadow">
           <div className="flex-1 px-4 flex justify-between">
             <div className="flex-1 flex">
               {/* Search peut être ajouté ici */}
@@ -194,7 +200,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               {/* Notifications */}
               <button
                 type="button"
-                className="bg-gray-800 p-1 rounded-full text-gray-400 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500"
+                className="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 <Bell className="h-6 w-6" />
               </button>
@@ -203,13 +209,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <div className="ml-3 relative">
                 <div className="flex items-center space-x-3">
                   <div className="hidden md:block">
-                    <p className="text-sm font-medium text-gray-200">{user.name}</p>
+                    <p className="text-sm font-medium text-gray-700">{user.name}</p>
                   </div>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleLogout}
-                    className="text-gray-400 hover:text-gray-200 hover:bg-gray-700"
+                    className="text-gray-500 hover:text-gray-700"
                   >
                     <LogOut className="h-4 w-4 mr-2" />
                     Déconnexion
@@ -220,7 +226,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </div>
         </div>
 
-        <main className="flex-1 relative overflow-y-auto focus:outline-none bg-gray-900">
+        <main className="flex-1 relative overflow-y-auto focus:outline-none">
           {children}
         </main>
       </div>

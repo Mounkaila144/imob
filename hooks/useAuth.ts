@@ -56,9 +56,15 @@ export function useAuthProvider() {
         setUser(userData);
 
         // Redirection automatique pour les admins
-        if (userData.role === 'admin' && window.location.pathname !== '/admin') {
+        if (userData.role === 'admin' && !window.location.pathname.startsWith('/admin')) {
           console.log('Admin user detected, redirecting to admin dashboard');
-          router.push('/admin');
+          setTimeout(() => router.push('/admin'), 100);
+        }
+
+        // Redirection automatique pour les listers
+        if (userData.role === 'lister' && !window.location.pathname.startsWith('/dashboard') && !window.location.pathname.startsWith('/admin')) {
+          console.log('Lister user detected, redirecting to dashboard');
+          setTimeout(() => router.push('/dashboard'), 100);
         }
       } catch (error) {
         console.error('Failed to load user profile:', error);
@@ -78,10 +84,16 @@ export function useAuthProvider() {
       const response = await authApi.login({ email, password });
       setUser(response.user);
 
-      // Redirection automatique pour les admins après login
+      // Redirection automatique après login
       if (response.user.role === 'admin') {
         console.log('Admin login detected, redirecting to admin dashboard');
-        router.push('/admin');
+        setTimeout(() => router.push('/admin'), 100);
+      } else if (response.user.role === 'lister') {
+        console.log('Lister login detected, redirecting to dashboard');
+        setTimeout(() => router.push('/dashboard'), 100);
+      } else {
+        // Pour les clients, rediriger vers l'accueil
+        setTimeout(() => router.push('/'), 100);
       }
     } catch (error) {
       if (error instanceof ApiError) {
@@ -108,10 +120,16 @@ export function useAuthProvider() {
       });
       setUser(response.user);
 
-      // Redirection automatique pour les admins après inscription
+      // Redirection automatique après inscription
       if (response.user.role === 'admin') {
         console.log('Admin registration detected, redirecting to admin dashboard');
-        router.push('/admin');
+        setTimeout(() => router.push('/admin'), 100);
+      } else if (response.user.role === 'lister') {
+        console.log('Lister registration detected, redirecting to dashboard');
+        setTimeout(() => router.push('/dashboard'), 100);
+      } else {
+        // Pour les clients, rediriger vers l'accueil
+        setTimeout(() => router.push('/'), 100);
       }
     } catch (error) {
       if (error instanceof ApiError) {

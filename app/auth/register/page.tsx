@@ -47,7 +47,7 @@ export default function RegisterPage() {
       };
       await registerUser(userData);
       toast.success('Inscription réussie !');
-      router.push('/');
+      // La redirection se fait automatiquement dans useAuth selon le rôle
     } catch (err: any) {
       const errorMessage = err?.message || 'Une erreur est survenue lors de l\'inscription';
       setError(errorMessage);
