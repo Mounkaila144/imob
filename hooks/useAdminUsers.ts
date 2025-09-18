@@ -84,11 +84,14 @@ export interface PaginatedUsers {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 export function useAdminUsers() {
-  const { token } = useAuth();
+  const { user, token } = useAuth();
   const [users, setUsers] = useState<PaginatedUsers | null>(null);
   const [statistics, setStatistics] = useState<UserStatistics | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  console.log('useAdminUsers - Current user:', user);
+  console.log('useAdminUsers - Current token:', !!token);
 
   const apiCall = async (endpoint: string, options: RequestInit = {}) => {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -104,10 +107,11 @@ export function useAdminUsers() {
     const data = await response.json();
 
     if (!response.ok) {
-      // Si l'erreur est liée au statut utilisateur, on continue avec les données mock
-      if (data.error_code === 'INACTIVE_USER' || data.message?.includes('pas actif')) {
-        console.warn('Utilisateur inactif, utilisation des données mock pour la démo');
-        return null; // On retourne null pour utiliser les données mock
+      // Si le token est expiré, rediriger vers login
+      if (response.status === 401) {
+        localStorage.removeItem('auth_token');
+        window.location.href = '/auth/login';
+        return null;
       }
       throw new Error(data.message || 'Une erreur est survenue');
     }
@@ -117,7 +121,11 @@ export function useAdminUsers() {
 
   // Récupérer la liste des utilisateurs
   const fetchUsers = async (filters: UserFilters = {}) => {
-    if (!token) return;
+    console.log('fetchUsers called with token:', !!token);
+    if (!token) {
+      console.log('No token available, skipping API call');
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -130,9 +138,13 @@ export function useAdminUsers() {
         }
       });
 
-      const response = await apiCall(`/admin/users?${params.toString()}`);
+      const url = `/admin/users?${params.toString()}`;
+      console.log('Making API call to:', url);
+      const response = await apiCall(url);
+      console.log('API response:', response);
       setUsers(response);
     } catch (err) {
+      console.error('Error fetching users:', err);
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
     } finally {
       setLoading(false);

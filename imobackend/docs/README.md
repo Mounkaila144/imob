@@ -471,6 +471,255 @@ Authorization: Bearer {token}
 
 ---
 
+## 👥 Gestion des Utilisateurs (Admin)
+
+### 📋 Liste des utilisateurs
+```http
+GET /api/admin/users
+Authorization: Bearer {token}
+```
+
+**Permissions :** Administrateurs uniquement
+
+**Paramètres de requête (optionnels) :**
+- `role` : `admin`, `lister`, `client`
+- `status` : `active`, `suspended`, `pending`
+- `search` : Recherche textuelle (nom, email, téléphone, entreprise)
+- `sort_by` : Champ de tri (`id`, `name`, `email`, `role`, `status`, `created_at`)
+- `sort_order` : Ordre de tri `asc` ou `desc` (défaut: `desc`)
+- `per_page` : Nombre d'éléments par page (max 100, défaut: 15)
+
+**Exemple :**
+```http
+GET /api/admin/users?role=lister&status=active&search=martin&per_page=25
+```
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Liste des utilisateurs récupérée avec succès",
+  "data": [
+    {
+      "id": 2,
+      "name": "Marie Martin",
+      "email": "marie.martin@example.com",
+      "phone": "+33123456789",
+      "role": "lister",
+      "status": "active",
+      "email_verified_at": "2024-01-10T10:30:00.000000Z",
+      "last_login_ip": "192.168.1.100",
+      "profile": {
+        "avatar_path": null,
+        "company": "Agence Martin Immobilier",
+        "about": "Agent immobilier expérimenté"
+      },
+      "stats": {
+        "listings_count": 12,
+        "inquiries_count": 5,
+        "deals_count": 3
+      },
+      "created_at": "2024-01-10T09:00:00.000000Z",
+      "updated_at": "2024-01-15T14:30:00.000000Z"
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "last_page": 3,
+    "per_page": 25,
+    "total": 67,
+    "from": 1,
+    "to": 25,
+    "has_more_pages": true
+  }
+}
+```
+
+### 🔍 Détail d'un utilisateur
+```http
+GET /api/admin/users/{id}
+Authorization: Bearer {token}
+```
+
+**Permissions :** Administrateurs uniquement
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Détails de l'utilisateur récupérés avec succès",
+  "data": {
+    "id": 2,
+    "name": "Marie Martin",
+    "email": "marie.martin@example.com",
+    "phone": "+33123456789",
+    "role": "lister",
+    "status": "active",
+    "email_verified_at": "2024-01-10T10:30:00.000000Z",
+    "last_login_ip": "192.168.1.100",
+    "profile": {
+      "avatar_path": null,
+      "company": "Agence Martin Immobilier",
+      "about": "Agent immobilier expérimenté"
+    },
+    "stats": {
+      "listings_count": 12,
+      "inquiries_count": 5,
+      "deals_count": 3
+    },
+    "detailed_stats": {
+      "total_listings": 12,
+      "active_listings": 8,
+      "total_inquiries": 5,
+      "pending_inquiries": 2,
+      "total_deals": 3,
+      "completed_deals": 2
+    },
+    "recent_activity": [
+      {
+        "action": "listing_created",
+        "subject_type": "App\\Models\\Listing",
+        "subject_id": 15,
+        "properties": {
+          "property_type": "apartment",
+          "city": "Paris",
+          "price": 450000
+        },
+        "created_at": "2024-01-15T14:30:00.000000Z"
+      }
+    ],
+    "created_at": "2024-01-10T09:00:00.000000Z",
+    "updated_at": "2024-01-15T14:30:00.000000Z"
+  }
+}
+```
+
+### ✏️ Modifier le statut d'un utilisateur
+```http
+PUT /api/admin/users/{id}/status
+Authorization: Bearer {token}
+```
+
+**Permissions :** Administrateurs uniquement
+
+**Body :**
+```json
+{
+  "status": "suspended",
+  "reason": "Violation des conditions d'utilisation"
+}
+```
+
+**Champs obligatoires :**
+- `status` : `active`, `suspended`, `pending`
+
+**Champs optionnels :**
+- `reason` : Raison du changement de statut
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Utilisateur suspendu avec succès",
+  "data": {
+    "id": 2,
+    "name": "Marie Martin",
+    "email": "marie.martin@example.com",
+    "status": "suspended",
+    // ... autres champs
+  }
+}
+```
+
+### 🛡️ Modifier le rôle d'un utilisateur
+```http
+PUT /api/admin/users/{id}/role
+Authorization: Bearer {token}
+```
+
+**Permissions :** Administrateurs uniquement
+
+**Body :**
+```json
+{
+  "role": "admin",
+  "reason": "Promotion au poste d'administrateur"
+}
+```
+
+**Champs obligatoires :**
+- `role` : `admin`, `lister`, `client`
+
+**Champs optionnels :**
+- `reason` : Raison du changement de rôle
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Utilisateur promu administrateur avec succès",
+  "data": {
+    "id": 2,
+    "name": "Marie Martin",
+    "email": "marie.martin@example.com",
+    "role": "admin",
+    // ... autres champs
+  }
+}
+```
+
+### 🗑️ Supprimer un utilisateur
+```http
+DELETE /api/admin/users/{id}
+Authorization: Bearer {token}
+```
+
+**Permissions :** Administrateurs uniquement
+
+**Restrictions :**
+- Un administrateur ne peut pas se supprimer lui-même
+- Impossible de supprimer le dernier administrateur actif
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Utilisateur supprimé avec succès"
+}
+```
+
+### 📊 Statistiques des utilisateurs
+```http
+GET /api/admin/users/statistics
+Authorization: Bearer {token}
+```
+
+**Permissions :** Administrateurs uniquement
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Statistiques des utilisateurs récupérées avec succès",
+  "data": {
+    "total_users": 150,
+    "by_role": {
+      "admin": 3,
+      "lister": 25,
+      "client": 122
+    },
+    "by_status": {
+      "active": 140,
+      "suspended": 5,
+      "pending": 5
+    },
+    "recent_registrations": 12
+  }
+}
+```
+
+---
+
 ## ⚠️ Codes d'erreur
 
 | Code | Message | Description |

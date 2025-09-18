@@ -46,99 +46,6 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 
-// Mock data temporaire
-const mockUsers = [
-  {
-    id: 1,
-    name: 'Jean Dupont',
-    email: 'jean.dupont@example.com',
-    role: 'client',
-    status: 'active',
-    phone: '+33 1 23 45 67 89',
-    created_at: '2024-01-15',
-    profile: {
-      company: null,
-      about: null
-    },
-    stats: {
-      listings_count: 0,
-      inquiries_count: 2,
-      deals_count: 0
-    }
-  },
-  {
-    id: 2,
-    name: 'Marie Martin',
-    email: 'marie.martin@example.com',
-    role: 'lister',
-    status: 'active',
-    phone: '+33 1 23 45 67 90',
-    created_at: '2024-01-10',
-    profile: {
-      company: 'Agence Martin Immobilier',
-      about: 'Agent immobilier expérimenté'
-    },
-    stats: {
-      listings_count: 12,
-      inquiries_count: 5,
-      deals_count: 3
-    }
-  },
-  {
-    id: 3,
-    name: 'Pierre Durand',
-    email: 'pierre.durand@example.com',
-    role: 'client',
-    status: 'pending',
-    phone: '+33 1 23 45 67 91',
-    created_at: '2024-01-20',
-    profile: {
-      company: null,
-      about: null
-    },
-    stats: {
-      listings_count: 0,
-      inquiries_count: 1,
-      deals_count: 0
-    }
-  },
-  {
-    id: 4,
-    name: 'Sophie Bernard',
-    email: 'sophie.bernard@example.com',
-    role: 'lister',
-    status: 'active',
-    phone: '+33 1 23 45 67 92',
-    created_at: '2024-01-12',
-    profile: {
-      company: 'Agence Sophie B.',
-      about: 'Spécialiste en vente de propriétés'
-    },
-    stats: {
-      listings_count: 8,
-      inquiries_count: 3,
-      deals_count: 2
-    }
-  },
-  {
-    id: 5,
-    name: 'Admin Test',
-    email: 'admin@test.com',
-    role: 'admin',
-    status: 'active',
-    phone: '+33 1 23 45 67 93',
-    created_at: '2024-01-01',
-    profile: {
-      company: null,
-      about: 'Compte administrateur'
-    },
-    stats: {
-      listings_count: 0,
-      inquiries_count: 0,
-      deals_count: 0
-    }
-  },
-];
 
 export default function SimpleAdminUsersPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -164,31 +71,15 @@ export default function SimpleAdminUsersPage() {
     deleteUser
   } = useAdminUsers();
 
-  // Utiliser les données de l'API ou fallback vers mock
-  const users = usersData?.data || mockUsers;
-
-  // Fallback vers les statistiques mockées si pas encore chargées depuis l'API
+  // Utiliser uniquement les données de l'API
+  const users = usersData?.data || [];
   const finalStatistics = apiStatistics || {
-    total_users: users.length,
-    by_role: {
-      admin: users.filter(u => u.role === 'admin').length,
-      lister: users.filter(u => u.role === 'lister').length,
-      client: users.filter(u => u.role === 'client').length,
-    },
-    by_status: {
-      active: users.filter(u => u.status === 'active').length,
-      suspended: users.filter(u => u.status === 'suspended').length,
-      pending: users.filter(u => u.status === 'pending').length,
-    },
-    recent_registrations: users.filter(u => {
-      const createdDate = new Date(u.created_at);
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      return createdDate >= weekAgo;
-    }).length,
+    total_users: 0,
+    by_role: { admin: 0, lister: 0, client: 0 },
+    by_status: { active: 0, suspended: 0, pending: 0 },
+    recent_registrations: 0,
   };
 
-  // Le filtrage se fait maintenant côté API, plus besoin de filtrer localement
   const filteredUsers = users;
 
   const getRoleColor = (role: string) => {
@@ -229,26 +120,17 @@ export default function SimpleAdminUsersPage() {
     if (!selectedUser || !newStatus) return;
 
     try {
-      if (isUsingMockData) {
-        // Simulation pour la démo
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        toast({
-          title: 'Statut mis à jour (Simulation)',
-          description: `Le statut de ${selectedUser.name} a été changé en ${newStatus === 'active' ? 'Actif' : newStatus === 'suspended' ? 'Suspendu' : 'En attente'} (données de démonstration)`,
-        });
-      } else {
-        await updateUserStatus(selectedUser.id, newStatus);
-        toast({
-          title: 'Statut mis à jour (API)',
-          description: `Le statut de ${selectedUser.name} a été changé en ${newStatus === 'active' ? 'Actif' : newStatus === 'suspended' ? 'Suspendu' : 'En attente'}`,
-        });
-        await fetchStatistics(); // Rafraîchir les statistiques
-      }
-
+      await updateUserStatus(selectedUser.id, newStatus);
+      toast({
+        title: 'Statut mis à jour',
+        description: `Le statut de ${selectedUser.name} a été changé en ${newStatus === 'active' ? 'Actif' : newStatus === 'suspended' ? 'Suspendu' : 'En attente'}`,
+      });
+      await fetchUsers(); // Rafraîchir la liste
+      await fetchStatistics(); // Rafraîchir les statistiques
       setShowActionModal(false);
     } catch (error) {
       toast({
-        title: 'Erreur API',
+        title: 'Erreur',
         description: error instanceof Error ? error.message : 'Impossible de mettre à jour le statut',
         variant: 'destructive',
       });
@@ -259,26 +141,17 @@ export default function SimpleAdminUsersPage() {
     if (!selectedUser || !newRole) return;
 
     try {
-      if (isUsingMockData) {
-        // Simulation pour la démo
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        toast({
-          title: 'Rôle mis à jour (Simulation)',
-          description: `Le rôle de ${selectedUser.name} a été changé en ${newRole === 'lister' ? 'Agent' : newRole === 'client' ? 'Client' : 'Admin'} (données de démonstration)`,
-        });
-      } else {
-        await updateUserRole(selectedUser.id, newRole);
-        toast({
-          title: 'Rôle mis à jour (API)',
-          description: `Le rôle de ${selectedUser.name} a été changé en ${newRole === 'lister' ? 'Agent' : newRole === 'client' ? 'Client' : 'Admin'}`,
-        });
-        await fetchStatistics(); // Rafraîchir les statistiques
-      }
-
+      await updateUserRole(selectedUser.id, newRole);
+      toast({
+        title: 'Rôle mis à jour',
+        description: `Le rôle de ${selectedUser.name} a été changé en ${newRole === 'lister' ? 'Agent' : newRole === 'client' ? 'Client' : 'Admin'}`,
+      });
+      await fetchUsers(); // Rafraîchir la liste
+      await fetchStatistics(); // Rafraîchir les statistiques
       setShowActionModal(false);
     } catch (error) {
       toast({
-        title: 'Erreur API',
+        title: 'Erreur',
         description: error instanceof Error ? error.message : 'Impossible de mettre à jour le rôle',
         variant: 'destructive',
       });
@@ -289,26 +162,17 @@ export default function SimpleAdminUsersPage() {
     if (!selectedUser) return;
 
     try {
-      if (isUsingMockData) {
-        // Simulation pour la démo
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        toast({
-          title: 'Utilisateur supprimé (Simulation)',
-          description: `${selectedUser.name} a été supprimé avec succès (données de démonstration)`,
-        });
-      } else {
-        await deleteUser(selectedUser.id);
-        toast({
-          title: 'Utilisateur supprimé (API)',
-          description: `${selectedUser.name} a été supprimé avec succès`,
-        });
-        await fetchStatistics(); // Rafraîchir les statistiques
-      }
-
+      await deleteUser(selectedUser.id);
+      toast({
+        title: 'Utilisateur supprimé',
+        description: `${selectedUser.name} a été supprimé avec succès`,
+      });
+      await fetchUsers(); // Rafraîchir la liste
+      await fetchStatistics(); // Rafraîchir les statistiques
       setShowActionModal(false);
     } catch (error) {
       toast({
-        title: 'Erreur API',
+        title: 'Erreur',
         description: error instanceof Error ? error.message : 'Impossible de supprimer l\'utilisateur',
         variant: 'destructive',
       });
@@ -345,9 +209,6 @@ export default function SimpleAdminUsersPage() {
     return () => clearTimeout(timeoutId);
   }, [searchTerm, roleFilter, statusFilter]);
 
-  // Vérifier si on utilise des données mock à cause d'un utilisateur inactif
-  const isUsingMockData = !usersData && !loading;
-
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-8">
@@ -365,20 +226,18 @@ export default function SimpleAdminUsersPage() {
         </div>
       </div>
 
-      {/* Banner d'information pour les données mock */}
-      {isUsingMockData && (
-        <div className="mb-6 bg-blue-900/20 border border-blue-700 rounded-lg p-4">
+      {/* Banner d'information si erreur API */}
+      {error && (
+        <div className="mb-6 bg-red-900/20 border border-red-700 rounded-lg p-4">
           <div className="flex items-center">
-            <AlertTriangle className="h-5 w-5 text-blue-400 mr-2" />
-            <span className="text-blue-400 font-medium">Mode Démonstration</span>
+            <AlertTriangle className="h-5 w-5 text-red-400 mr-2" />
+            <span className="text-red-400 font-medium">Erreur API</span>
           </div>
           <p className="text-gray-300 mt-2">
-            L'interface utilise des données de démonstration car l'utilisateur actuel n'a pas encore été activé par un administrateur.
-            <br />
-            <strong>Les actions (modification statut/rôle, suppression) sont fonctionnelles mais utilisent des simulations.</strong>
+            {error}
           </p>
           <p className="text-gray-400 mt-2 text-sm">
-            Pour tester avec de vraies données API : Activez l'utilisateur "admin@test.com" (ID: 5) en base de données en changeant status="pending" vers status="active".
+            Vérifiez votre connexion ou contactez l'administrateur.
           </p>
         </div>
       )}
@@ -506,70 +365,89 @@ export default function SimpleAdminUsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers.map((user) => (
-                <TableRow key={user.id} className="border-gray-700 hover:bg-gray-700">
-                  <TableCell>
-                    <div className="cursor-pointer">
-                      <div className="font-medium text-gray-100 hover:text-blue-400">{user.name}</div>
-                      <div className="text-sm text-gray-400">{user.email}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className={getRoleColor(user.role)}>
-                      {user.role === 'lister' ? 'Agent' : user.role === 'client' ? 'Client' : 'Admin'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className={getStatusColor(user.status)}>
-                      {user.status === 'active' ? 'Actif' :
-                       user.status === 'pending' ? 'En attente' : 'Suspendu'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-gray-300">{user.phone || '-'}</TableCell>
-                  <TableCell className="text-gray-300">{user.profile.company || '-'}</TableCell>
-                  <TableCell className="text-gray-300">
-                    <div className="text-center">
-                      <span className="font-medium">{user.stats.listings_count}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-gray-300">{new Date(user.created_at).toLocaleDateString('fr-FR')}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end space-x-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleUserAction('view', user.id)}
-                        title="Voir les détails"
-                        className="text-gray-400 hover:text-blue-400"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleUserAction('manage', user.id)}
-                        title="Gérer l'utilisateur"
-                        className="text-gray-400 hover:text-blue-400"
-                      >
-                        <Settings className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setActionType('delete');
-                          setShowActionModal(true);
-                        }}
-                        title="Supprimer l'utilisateur"
-                        className="text-gray-400 hover:text-red-400"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8">
+                    <div className="flex items-center justify-center">
+                      <RefreshCw className="h-5 w-5 mr-2 animate-spin text-gray-400" />
+                      <span className="text-gray-400">Chargement des utilisateurs...</span>
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : filteredUsers.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8">
+                    <div className="text-gray-400">
+                      {error ? 'Impossible de charger les utilisateurs' : 'Aucun utilisateur trouvé'}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredUsers.map((user) => (
+                  <TableRow key={user.id} className="border-gray-700 hover:bg-gray-700">
+                    <TableCell>
+                      <div className="cursor-pointer">
+                        <div className="font-medium text-gray-100 hover:text-blue-400">{user.name}</div>
+                        <div className="text-sm text-gray-400">{user.email}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className={getRoleColor(user.role)}>
+                        {user.role === 'lister' ? 'Agent' : user.role === 'client' ? 'Client' : 'Admin'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className={getStatusColor(user.status)}>
+                        {user.status === 'active' ? 'Actif' :
+                         user.status === 'pending' ? 'En attente' : 'Suspendu'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-gray-300">{user.phone || '-'}</TableCell>
+                    <TableCell className="text-gray-300">{user.profile?.company || '-'}</TableCell>
+                    <TableCell className="text-gray-300">
+                      <div className="text-center">
+                        <span className="font-medium">{user.stats?.listings_count || 0}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-gray-300">{new Date(user.created_at).toLocaleDateString('fr-FR')}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end space-x-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleUserAction('view', user.id)}
+                          title="Voir les détails"
+                          className="text-gray-400 hover:text-blue-400"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleUserAction('manage', user.id)}
+                          title="Gérer l'utilisateur"
+                          className="text-gray-400 hover:text-blue-400"
+                        >
+                          <Settings className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setActionType('delete');
+                            setShowActionModal(true);
+                          }}
+                          title="Supprimer l'utilisateur"
+                          className="text-gray-400 hover:text-red-400"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -639,15 +517,15 @@ export default function SimpleAdminUsersPage() {
                 <Label className="text-gray-300">Statistiques</Label>
                 <div className="grid grid-cols-3 gap-4 mt-2">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-400">{selectedUser.stats.listings_count}</div>
+                    <div className="text-2xl font-bold text-blue-400">{selectedUser.stats?.listings_count || 0}</div>
                     <div className="text-sm text-gray-400">Annonces</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-400">{selectedUser.stats.inquiries_count}</div>
+                    <div className="text-2xl font-bold text-green-400">{selectedUser.stats?.inquiries_count || 0}</div>
                     <div className="text-sm text-gray-400">Demandes</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-yellow-400">{selectedUser.stats.deals_count}</div>
+                    <div className="text-2xl font-bold text-yellow-400">{selectedUser.stats?.deals_count || 0}</div>
                     <div className="text-sm text-gray-400">Transactions</div>
                   </div>
                 </div>
@@ -696,8 +574,8 @@ export default function SimpleAdminUsersPage() {
                     Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action supprimera également :
                   </p>
                   <ul className="text-gray-400 mt-2 ml-4 list-disc">
-                    <li>Toutes ses annonces ({selectedUser.stats.listings_count})</li>
-                    <li>Son historique de transactions ({selectedUser.stats.deals_count})</li>
+                    <li>Toutes ses annonces ({selectedUser.stats?.listings_count || 0})</li>
+                    <li>Son historique de transactions ({selectedUser.stats?.deals_count || 0})</li>
                     <li>Toutes ses données personnelles</li>
                   </ul>
                 </div>

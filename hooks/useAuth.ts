@@ -7,6 +7,7 @@ import { authApi, ApiError } from '@/lib/api';
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (userData: RegisterUserData) => Promise<void>;
   logout: () => Promise<void>;
@@ -37,6 +38,7 @@ export function useAuth() {
 
 export function useAuthProvider() {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -45,10 +47,11 @@ export function useAuthProvider() {
   }, []);
 
   const initializeAuth = async () => {
-    const token = localStorage.getItem('auth_token');
-    console.log('Initializing auth, token found:', !!token);
+    const storedToken = localStorage.getItem('auth_token');
+    console.log('Initializing auth, token found:', !!storedToken);
 
-    if (token) {
+    if (storedToken) {
+      setToken(storedToken);
       try {
         console.log('Attempting to fetch user profile...');
         const userData = await authApi.getProfile();
@@ -70,10 +73,12 @@ export function useAuthProvider() {
         console.error('Failed to load user profile:', error);
         localStorage.removeItem('auth_token');
         setUser(null);
+        setToken(null);
       }
     } else {
       console.log('No token found, user not authenticated');
       setUser(null);
+      setToken(null);
     }
     setLoading(false);
   };
@@ -83,6 +88,7 @@ export function useAuthProvider() {
     try {
       const response = await authApi.login({ email, password });
       setUser(response.user);
+      setToken(response.token);
 
       // Redirection automatique après login
       if (response.user.role === 'admin') {
@@ -119,6 +125,7 @@ export function useAuthProvider() {
         about: userData.about,
       });
       setUser(response.user);
+      setToken(response.token);
 
       // Redirection automatique après inscription
       if (response.user.role === 'admin') {
@@ -153,6 +160,7 @@ export function useAuthProvider() {
       console.error('Logout error:', error);
     } finally {
       setUser(null);
+      setToken(null);
       setLoading(false);
     }
   };
@@ -169,6 +177,7 @@ export function useAuthProvider() {
 
   return {
     user,
+    token,
     login,
     register,
     logout,
