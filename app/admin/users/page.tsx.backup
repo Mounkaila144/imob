@@ -1,0 +1,469 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Search,
+  Plus,
+  MoreVertical,
+  Edit,
+  Trash2,
+  UserCheck,
+  UserX,
+  Filter,
+  Eye,
+  Settings,
+  RefreshCw
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useAdminUsers, type User, type UserDetails } from '@/hooks/useAdminUsers';
+import UserDetailsModal from '@/components/admin/UserDetailsModal';
+import UserActionsModal from '@/components/admin/UserActionsModal';
+
+export default function AdminUsersPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('created_at');
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(15);
+
+  // Modals state
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showActionsModal, setShowActionsModal] = useState(false);
+
+  const { toast } = useToast();
+  const {
+    users,
+    statistics,
+    loading,
+    error,
+    fetchUsers,
+    fetchUserDetails,
+    updateUserStatus,
+    updateUserRole,
+    deleteUser,
+  } = useAdminUsers();
+
+  // Fetch users when filters change
+  useEffect(() => {
+    const filters = {
+      role: roleFilter === 'all' ? undefined : roleFilter,
+      status: statusFilter === 'all' ? undefined : statusFilter,
+      search: searchTerm || undefined,
+      sort_by: sortBy,
+      sort_order: sortOrder,
+      per_page: perPage,
+    };
+
+    const timeoutId = setTimeout(() => {
+      fetchUsers(filters);
+    }, 300); // Debounce search
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, roleFilter, statusFilter, sortBy, sortOrder, perPage, currentPage]);
+
+  // Handle actions
+  const handleViewUser = async (user: User) => {
+    try {
+      setSelectedUser(user);
+      const details = await fetchUserDetails(user.id);
+      setUserDetails(details);
+      setShowDetailsModal(true);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de récupérer les détails de l'utilisateur",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUserAction = async (action: string, userId: number, data?: any) => {
+    try {
+      switch (action) {
+        case 'updateStatus':
+          await updateUserStatus(userId, data.status, data.reason);
+          toast({
+            title: "Succès",
+            description: "Statut de l'utilisateur modifié avec succès",
+          });
+          break;
+        case 'updateRole':
+          await updateUserRole(userId, data.role, data.reason);
+          toast({
+            title: "Succès",
+            description: "Rôle de l'utilisateur modifié avec succès",
+          });
+          break;
+        case 'delete':
+          await deleteUser(userId);
+          toast({
+            title: "Succès",
+            description: "Utilisateur supprimé avec succès",
+          });
+          break;
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: error instanceof Error ? error.message : "Une erreur est survenue",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'admin': return 'bg-purple-100 text-purple-800';
+      case 'lister': return 'bg-blue-100 text-blue-800';
+      case 'client': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'bg-green-100 text-green-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'suspended': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="p-6 max-w-7xl mx-auto">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <h2 className="text-xl font-semibold text-red-800 mb-2">Erreur</h2>
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button onClick={() => fetchUsers()} variant="outline">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Réessayer
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6 max-w-7xl mx-auto">
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Gestion des Utilisateurs</h1>
+            <p className="mt-2 text-gray-600">
+              Gérez tous les utilisateurs de la plateforme
+            </p>
+          </div>
+          <Button onClick={() => fetchUsers()} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Actualiser
+          </Button>
+        </div>
+      </div>
+
+      {/* Statistiques rapides */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <div className="text-2xl font-bold text-gray-900">
+                {statistics?.total_users || 0}
+              </div>
+              <div className="ml-2 text-sm text-gray-600">
+                Total utilisateurs
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <div className="text-2xl font-bold text-blue-600">
+                {statistics?.by_role.lister || 0}
+              </div>
+              <div className="ml-2 text-sm text-gray-600">
+                Agents
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <div className="text-2xl font-bold text-green-600">
+                {statistics?.by_role.client || 0}
+              </div>
+              <div className="ml-2 text-sm text-gray-600">
+                Clients
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <div className="text-2xl font-bold text-yellow-600">
+                {statistics?.by_status.pending || 0}
+              </div>
+              <div className="ml-2 text-sm text-gray-600">
+                En attente
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filtres et actions */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Filtres et Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Rechercher par nom, email, téléphone ou entreprise..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <Select value={roleFilter} onValueChange={setRoleFilter}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filtrer par rôle" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les rôles</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="lister">Agent</SelectItem>
+                <SelectItem value="client">Client</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filtrer par statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les statuts</SelectItem>
+                <SelectItem value="active">Actif</SelectItem>
+                <SelectItem value="pending">En attente</SelectItem>
+                <SelectItem value="suspended">Suspendu</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={`${perPage}`} onValueChange={(value) => setPerPage(Number(value))}>
+              <SelectTrigger className="w-full sm:w-[120px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10 par page</SelectItem>
+                <SelectItem value="15">15 par page</SelectItem>
+                <SelectItem value="25">25 par page</SelectItem>
+                <SelectItem value="50">50 par page</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tableau des utilisateurs */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Liste des Utilisateurs</CardTitle>
+              <CardDescription>
+                {users?.pagination.total || 0} utilisateur(s) trouvé(s)
+                {users?.pagination.total && users.pagination.total > users.pagination.per_page && (
+                  <span className="ml-2">
+                    (Page {users.pagination.current_page} sur {users.pagination.last_page})
+                  </span>
+                )}
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="created_at">Date d'inscription</SelectItem>
+                  <SelectItem value="name">Nom</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="role">Rôle</SelectItem>
+                  <SelectItem value="status">Statut</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              >
+                {sortOrder === 'asc' ? '↑' : '↓'}
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <RefreshCw className="h-8 w-8 animate-spin text-gray-400" />
+              <span className="ml-2 text-gray-600">Chargement...</span>
+            </div>
+          ) : users?.data.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">Aucun utilisateur trouvé</p>
+            </div>
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Utilisateur</TableHead>
+                    <TableHead>Rôle</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Téléphone</TableHead>
+                    <TableHead>Entreprise</TableHead>
+                    <TableHead>Annonces</TableHead>
+                    <TableHead>Date d'inscription</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users?.data.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <div className="cursor-pointer" onClick={() => handleViewUser(user)}>
+                          <div className="font-medium hover:text-blue-600">{user.name}</div>
+                          <div className="text-sm text-gray-500">{user.email}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className={getRoleColor(user.role)}>
+                          {user.role === 'lister' ? 'Agent' : user.role === 'client' ? 'Client' : 'Admin'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className={getStatusColor(user.status)}>
+                          {user.status === 'active' ? 'Actif' :
+                           user.status === 'pending' ? 'En attente' : 'Suspendu'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{user.phone || '-'}</TableCell>
+                      <TableCell>{user.profile.company || '-'}</TableCell>
+                      <TableCell>
+                        <div className="text-center">
+                          <span className="font-medium">{user.stats.listings_count}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{new Date(user.created_at).toLocaleDateString('fr-FR')}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end space-x-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewUser(user)}
+                            title="Voir les détails"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setShowActionsModal(true);
+                            }}
+                            title="Gérer l'utilisateur"
+                          >
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              {/* Pagination */}
+              {users && users.pagination.last_page > 1 && (
+                <div className="flex items-center justify-between mt-4">
+                  <div className="text-sm text-gray-600">
+                    Affichage de {users.pagination.from} à {users.pagination.to} sur {users.pagination.total} résultats
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={users.pagination.current_page === 1}
+                    >
+                      Précédent
+                    </Button>
+                    <span className="text-sm text-gray-600">
+                      Page {users.pagination.current_page} sur {users.pagination.last_page}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => prev + 1)}
+                      disabled={!users.pagination.has_more_pages}
+                    >
+                      Suivant
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Modals */}
+      <UserDetailsModal
+        user={userDetails}
+        isOpen={showDetailsModal}
+        onClose={() => {
+          setShowDetailsModal(false);
+          setUserDetails(null);
+          setSelectedUser(null);
+        }}
+      />
+
+      <UserActionsModal
+        user={selectedUser}
+        isOpen={showActionsModal}
+        onClose={() => {
+          setShowActionsModal(false);
+          setSelectedUser(null);
+        }}
+        onAction={handleUserAction}
+      />
+    </div>
+  );
+}
