@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
+import { dashboardApi } from '@/lib/api';
 
 interface DashboardStats {
   properties: {
@@ -72,24 +73,8 @@ export function useDashboard() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('http://localhost:8000/api/dashboard/stats', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Erreur lors du chargement des statistiques');
-      }
-
-      if (data.success) {
-        setStats(data.data);
-      } else {
-        throw new Error(data.message || 'Erreur lors du chargement des statistiques');
-      }
+      const data = await dashboardApi.getStats();
+      setStats(data);
     } catch (err) {
       console.error('Erreur lors du chargement du dashboard:', err);
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
@@ -102,18 +87,8 @@ export function useDashboard() {
     if (!token) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/dashboard/recent-properties?limit=${limit}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setRecentProperties(data.data);
-      }
+      const data = await dashboardApi.getRecentProperties();
+      setRecentProperties(data);
     } catch (err) {
       console.error('Erreur lors du chargement des propriétés récentes:', err);
     }

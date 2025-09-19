@@ -475,15 +475,21 @@ export const listingsApi = {
   },
 };
 
+// Dashboard APIs
+export const dashboardApi = {
+  getStats: async (): Promise<any> => {
+    return apiRequest('dashboard/stats');
+  },
+
+  getRecentProperties: async (): Promise<any> => {
+    return apiRequest('dashboard/recent-properties');
+  },
+};
+
 // Admin Dashboard API
 export const adminDashboardApi = {
   getStats: async (): Promise<any> => {
-    const token = localStorage.getItem('auth_token');
-    return apiRequest('admin/dashboard/stats', {
-      headers: {
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
-    });
+    return apiRequest('admin/dashboard/stats');
   },
 };
 
