@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ListingPhotoController;
 use App\Http\Controllers\DashboardController;
@@ -44,6 +45,9 @@ Route::middleware(['auth:api', 'active.user'])->group(function () {
     Route::middleware('role:admin')->group(function () {
         // Admin can manage all listings
         Route::put('listings/{listing}/status', [ListingController::class, 'updateStatus']);
+
+        // Admin dashboard routes
+        Route::get('admin/dashboard/stats', [AdminDashboardController::class, 'getStats']);
 
         // User management routes
         Route::prefix('admin/users')->group(function () {

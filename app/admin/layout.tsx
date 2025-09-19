@@ -54,21 +54,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       href: '/admin/properties',
       icon: Home,
     },
-    {
-      name: 'Messages',
-      href: '/admin/messages',
-      icon: MessageSquare,
-    },
-    {
-      name: 'Analytics',
-      href: '/admin/analytics',
-      icon: BarChart3,
-    },
-    {
-      name: 'Paramètres',
-      href: '/admin/settings',
-      icon: Settings,
-    },
   ];
 
   return (

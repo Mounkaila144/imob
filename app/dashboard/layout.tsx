@@ -74,27 +74,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       name: 'Nouvelle Propriété',
       href: '/dashboard/properties/create',
       icon: Plus,
-    },
-    {
-      name: 'Messages',
-      href: '/dashboard/messages',
-      icon: MessageSquare,
-    },
-    {
-      name: 'Rendez-vous',
-      href: '/dashboard/appointments',
-      icon: Calendar,
-    },
-    {
-      name: 'Statistiques',
-      href: '/dashboard/analytics',
-      icon: BarChart3,
-    },
-    {
-      name: 'Paramètres',
-      href: '/dashboard/settings',
-      icon: Settings,
-    },
+    }
   ];
 
   return (

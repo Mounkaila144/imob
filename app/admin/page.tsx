@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/hooks/useAuth';
+import { useAdminDashboard } from '@/hooks/useAdminDashboard';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,16 +18,17 @@ import {
 } from 'lucide-react';
 
 export default function AdminDashboard() {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { stats, loading: dashboardLoading, error, formatCurrency, formatNumber, formatTime, getRoleDisplayName, getActivityColor } = useAdminDashboard();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && (!user || user.role !== 'admin')) {
+    if (!authLoading && (!user || user.role !== 'admin')) {
       router.push('/');
     }
-  }, [user, loading, router]);
+  }, [user, authLoading, router]);
 
-  if (loading) {
+  if (authLoading || dashboardLoading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
@@ -41,40 +43,53 @@ export default function AdminDashboard() {
     return null;
   }
 
-  const stats = [
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400 mb-4">Erreur: {error}</p>
+          <Button onClick={() => window.location.reload()} className="bg-blue-600 hover:bg-blue-700">
+            Réessayer
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const dashboardStats = stats ? [
     {
       title: 'Utilisateurs Total',
-      value: '1,234',
-      description: '+12% ce mois',
+      value: formatNumber(stats.users.total),
+      description: stats.users.growth_text,
       icon: Users,
       color: 'text-blue-600',
       bgColor: 'bg-blue-100',
     },
     {
       title: 'Propriétés Actives',
-      value: '856',
-      description: '+8% ce mois',
+      value: formatNumber(stats.listings.active),
+      description: stats.listings.growth_text,
       icon: Home,
       color: 'text-green-600',
       bgColor: 'bg-green-100',
     },
     {
-      title: 'Revenus Mensuels',
-      value: 'CFA24,500',
-      description: '+15% ce mois',
+      title: 'Revenus Totaux',
+      value: formatCurrency(stats.revenue.total, stats.revenue.currency),
+      description: stats.revenue.growth_text,
       icon: TrendingUp,
       color: 'text-purple-600',
       bgColor: 'bg-purple-100',
     },
     {
       title: 'Messages Non Lus',
-      value: '42',
-      description: 'Nécessite attention',
+      value: stats.inquiries.unread.toString(),
+      description: stats.inquiries.description,
       icon: MessageSquare,
       color: 'text-orange-600',
       bgColor: 'bg-orange-100',
     },
-  ];
+  ] : [];
 
   const quickActions = [
     {
@@ -134,7 +149,7 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => {
+          {dashboardStats.map((stat, index) => {
             const Icon = stat.icon;
             return (
               <Card key={index} className="bg-gray-800 border-gray-700">
@@ -202,36 +217,26 @@ export default function AdminDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-200">Nouveau utilisateur inscrit</p>
-                    <p className="text-xs text-gray-500">Il y a 5 minutes</p>
-                  </div>
+              {stats?.recent_activity && stats.recent_activity.length > 0 ? (
+                <div className="space-y-4">
+                  {stats.recent_activity.slice(0, 6).map((activity, index) => (
+                    <div key={index} className="flex items-center space-x-3">
+                      <div className={`w-2 h-2 ${getActivityColor(activity.action)} rounded-full`}></div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-200">{activity.description}</p>
+                        <p className="text-xs text-gray-500">
+                          par {activity.user_name} • {new Date(activity.created_at).toLocaleDateString('fr-FR')}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-200">Propriété publiée</p>
-                    <p className="text-xs text-gray-500">Il y a 12 minutes</p>
-                  </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-600" />
+                  <p>Aucune activité récente</p>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-200">Demande de visite</p>
-                    <p className="text-xs text-gray-500">Il y a 30 minutes</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-200">Paiement traité</p>
-                    <p className="text-xs text-gray-500">Il y a 1 heure</p>
-                  </div>
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
 
@@ -243,31 +248,49 @@ export default function AdminDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-400">Taux de conversion</span>
-                  <span className="text-sm font-medium text-gray-200">3.2%</span>
-                </div>
-                <div className="w-full bg-gray-700 rounded-full h-2">
-                  <div className="bg-blue-600 h-2 rounded-full" style={{ width: '32%' }}></div>
-                </div>
+              {stats?.platform_performance ? (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-400">Taux de conversion</span>
+                    <span className="text-sm font-medium text-gray-200">{stats.platform_performance.conversion_rate}%</span>
+                  </div>
+                  <div className="w-full bg-gray-700 rounded-full h-2">
+                    <div
+                      className="bg-blue-600 h-2 rounded-full"
+                      style={{ width: `${Math.min(stats.platform_performance.conversion_rate, 100)}%` }}
+                    ></div>
+                  </div>
 
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-400">Satisfaction utilisateur</span>
-                  <span className="text-sm font-medium text-gray-200">4.8/5</span>
-                </div>
-                <div className="w-full bg-gray-700 rounded-full h-2">
-                  <div className="bg-green-600 h-2 rounded-full" style={{ width: '96%' }}></div>
-                </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-400">Satisfaction utilisateur</span>
+                    <span className="text-sm font-medium text-gray-200">{stats.platform_performance.satisfaction_rate}%</span>
+                  </div>
+                  <div className="w-full bg-gray-700 rounded-full h-2">
+                    <div
+                      className="bg-green-600 h-2 rounded-full"
+                      style={{ width: `${stats.platform_performance.satisfaction_rate}%` }}
+                    ></div>
+                  </div>
 
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-400">Temps de réponse moyen</span>
-                  <span className="text-sm font-medium text-gray-200">2.1h</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-400">Temps de réponse moyen</span>
+                    <span className="text-sm font-medium text-gray-200">
+                      {formatTime(stats.platform_performance.avg_response_time)}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-700 rounded-full h-2">
+                    <div
+                      className="bg-yellow-600 h-2 rounded-full"
+                      style={{ width: `${Math.max(0, 100 - stats.platform_performance.avg_response_time * 10)}%` }}
+                    ></div>
+                  </div>
                 </div>
-                <div className="w-full bg-gray-700 rounded-full h-2">
-                  <div className="bg-yellow-600 h-2 rounded-full" style={{ width: '78%' }}></div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-600" />
+                  <p>Aucune donnée de performance disponible</p>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </div>
