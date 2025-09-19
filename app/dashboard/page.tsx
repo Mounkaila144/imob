@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/hooks/useAuth';
+import { useDashboard } from '@/hooks/useDashboard';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,16 +21,17 @@ import {
 } from 'lucide-react';
 
 export default function ListerDashboard() {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { stats, recentProperties, loading: dashboardLoading, error, formatCurrency, formatNumber } = useDashboard();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && (!user || user.role !== 'lister')) {
+    if (!authLoading && (!user || user.role !== 'lister')) {
       router.push('/');
     }
-  }, [user, loading, router]);
+  }, [user, authLoading, router]);
 
-  if (loading) {
+  if (authLoading || dashboardLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -44,40 +46,53 @@ export default function ListerDashboard() {
     return null;
   }
 
-  const stats = [
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Erreur: {error}</p>
+          <Button onClick={() => window.location.reload()}>
+            Réessayer
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const dashboardStats = stats ? [
     {
       title: 'Mes Propriétés',
-      value: '12',
-      description: '+2 ce mois',
+      value: stats.properties.total.toString(),
+      description: stats.properties.growth_text,
       icon: Home,
       color: 'text-blue-600',
       bgColor: 'bg-blue-100',
     },
     {
       title: 'Vues Totales',
-      value: '2,847',
-      description: '+15% ce mois',
+      value: formatNumber(stats.views.total),
+      description: stats.views.growth_text,
       icon: Eye,
       color: 'text-green-600',
       bgColor: 'bg-green-100',
     },
     {
       title: 'Messages Reçus',
-      value: '34',
-      description: '8 non lus',
+      value: stats.inquiries.total.toString(),
+      description: stats.inquiries.description,
       icon: MessageSquare,
       color: 'text-orange-600',
       bgColor: 'bg-orange-100',
     },
     {
       title: 'Revenus Estimés',
-      value: 'CFA8,420',
-      description: '+22% ce mois',
+      value: formatCurrency(stats.revenue.total, stats.revenue.currency),
+      description: stats.revenue.growth_text,
       icon: DollarSign,
       color: 'text-purple-600',
       bgColor: 'bg-purple-100',
     },
-  ];
+  ] : [];
 
   const quickActions = [
     {
@@ -114,47 +129,29 @@ export default function ListerDashboard() {
     },
   ];
 
-  const recentProperties = [
-    {
-      id: 1,
-      title: 'Appartement moderne à Paris',
-      price: 'CFA450,000',
-      status: 'active',
-      views: 234,
-      messages: 5,
-    },
-    {
-      id: 2,
-      title: 'Maison avec jardin à Lyon',
-      price: 'CFA320,000',
-      status: 'pending',
-      views: 156,
-      messages: 2,
-    },
-    {
-      id: 3,
-      title: 'Studio meublé centre-ville',
-      price: 'CFA850/mois',
-      status: 'active',
-      views: 89,
-      messages: 8,
-    },
-  ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'published': return 'bg-green-100 text-green-800';
+      case 'pending_review': return 'bg-yellow-100 text-yellow-800';
       case 'draft': return 'bg-gray-100 text-gray-800';
+      case 'rejected': return 'bg-red-100 text-red-800';
+      case 'archived': return 'bg-gray-100 text-gray-800';
+      case 'sold': return 'bg-blue-100 text-blue-800';
+      case 'rented': return 'bg-purple-100 text-purple-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'active': return 'Actif';
-      case 'pending': return 'En attente';
+      case 'published': return 'Publié';
+      case 'pending_review': return 'En attente';
       case 'draft': return 'Brouillon';
+      case 'rejected': return 'Rejeté';
+      case 'archived': return 'Archivé';
+      case 'sold': return 'Vendu';
+      case 'rented': return 'Loué';
       default: return status;
     }
   };
@@ -190,7 +187,7 @@ export default function ListerDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => {
+          {dashboardStats.map((stat, index) => {
             const Icon = stat.icon;
             return (
               <Card key={index}>
@@ -251,29 +248,52 @@ export default function ListerDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentProperties.map((property) => (
+                {recentProperties.length > 0 ? recentProperties.map((property) => (
                   <div key={property.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div className="flex-1">
                       <h4 className="font-medium text-gray-900">{property.title}</h4>
-                      <p className="text-sm text-gray-600">{property.price}</p>
+                      <p className="text-sm text-gray-600">
+                        {formatCurrency(property.price, property.currency)}
+                        {property.type === 'rent' ? '/mois' : ''}
+                      </p>
                       <div className="flex items-center space-x-4 mt-2">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(property.status)}`}>
                           {getStatusLabel(property.status)}
                         </span>
-                        <span className="text-xs text-gray-500">{property.views} vues</span>
-                        <span className="text-xs text-gray-500">{property.messages} messages</span>
+                        <span className="text-xs text-gray-500">{property.views_count} vues</span>
+                        <span className="text-xs text-gray-500">{property.inquiries_count} messages</span>
                       </div>
                     </div>
                     <div className="flex space-x-2">
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => router.push(`/dashboard/properties/${property.id}`)}
+                      >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => router.push(`/dashboard/properties/${property.id}/edit`)}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Home className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>Aucune propriété récente</p>
+                    <Button
+                      variant="outline"
+                      className="mt-4"
+                      onClick={() => router.push('/dashboard/properties/create')}
+                    >
+                      Créer votre première propriété
+                    </Button>
+                  </div>
+                )}
               </div>
               <Button variant="outline" className="w-full mt-4" onClick={() => router.push('/dashboard/properties')}>
                 Voir toutes mes propriétés
@@ -290,39 +310,58 @@ export default function ListerDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Vues totales</span>
-                  <span className="text-sm font-medium">2,847</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-blue-600 h-2 rounded-full" style={{ width: '75%' }}></div>
-                </div>
+              {stats?.monthly_performance ? (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Vues ce mois</span>
+                    <span className="text-sm font-medium">{formatNumber(stats.monthly_performance.views)}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-blue-600 h-2 rounded-full"
+                      style={{ width: `${Math.min((stats.monthly_performance.views / (stats.views.total || 1)) * 100, 100)}%` }}
+                    ></div>
+                  </div>
 
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Messages reçus</span>
-                  <span className="text-sm font-medium">34</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-green-600 h-2 rounded-full" style={{ width: '60%' }}></div>
-                </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Messages ce mois</span>
+                    <span className="text-sm font-medium">{stats.monthly_performance.inquiries}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-green-600 h-2 rounded-full"
+                      style={{ width: `${Math.min((stats.monthly_performance.inquiries / (stats.inquiries.total || 1)) * 100, 100)}%` }}
+                    ></div>
+                  </div>
 
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Rendez-vous programmés</span>
-                  <span className="text-sm font-medium">12</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-purple-600 h-2 rounded-full" style={{ width: '40%' }}></div>
-                </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Rendez-vous programmés</span>
+                    <span className="text-sm font-medium">{stats.monthly_performance.appointments}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-purple-600 h-2 rounded-full"
+                      style={{ width: `${Math.min(stats.monthly_performance.appointments * 10, 100)}%` }}
+                    ></div>
+                  </div>
 
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Taux de réponse</span>
-                  <span className="text-sm font-medium">94%</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Taux de réponse</span>
+                    <span className="text-sm font-medium">{stats.monthly_performance.response_rate}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-yellow-600 h-2 rounded-full"
+                      style={{ width: `${stats.monthly_performance.response_rate}%` }}
+                    ></div>
+                  </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-yellow-600 h-2 rounded-full" style={{ width: '94%' }}></div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p>Aucune donnée de performance disponible</p>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </div>

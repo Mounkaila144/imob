@@ -95,6 +95,9 @@ class ListingPhotoController extends ApiController
         // Supprimer le fichier physique
         if ($photo->path && Storage::disk($photo->disk)->exists($photo->path)) {
             Storage::disk($photo->disk)->delete($photo->path);
+
+            // Vérifier si le dossier est maintenant vide et le supprimer si nécessaire
+            $this->deleteEmptyDirectory(dirname($photo->path), $photo->disk);
         }
 
         // Si c'était la photo de couverture, définir la suivante comme couverture
@@ -167,5 +170,30 @@ class ListingPhotoController extends ApiController
         }
 
         return $this->successResponse(null, 'Ordre des photos mis à jour avec succès');
+    }
+
+    /**
+     * Supprimer un dossier s'il est vide
+     */
+    private function deleteEmptyDirectory(string $directory, string $disk = 'public'): void
+    {
+        try {
+            // Vérifier si le dossier existe
+            if (!Storage::disk($disk)->exists($directory)) {
+                return;
+            }
+
+            // Lister le contenu du dossier
+            $files = Storage::disk($disk)->files($directory);
+            $directories = Storage::disk($disk)->directories($directory);
+
+            // Si le dossier est vide (pas de fichiers ni de sous-dossiers)
+            if (empty($files) && empty($directories)) {
+                Storage::disk($disk)->deleteDirectory($directory);
+            }
+        } catch (\Exception $e) {
+            // Log l'erreur mais ne pas faire échouer la suppression
+            \Log::warning("Impossible de supprimer le dossier vide {$directory}: " . $e->getMessage());
+        }
     }
 }

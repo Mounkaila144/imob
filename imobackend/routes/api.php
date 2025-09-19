@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ListingPhotoController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -61,6 +62,10 @@ Route::middleware(['auth:api', 'active.user'])->group(function () {
         Route::put('listings/{listing}', [ListingController::class, 'update']);
         Route::delete('listings/{listing}', [ListingController::class, 'destroy']);
         Route::get('my-listings', [ListingController::class, 'myListings']);
+
+        // Dashboard routes
+        Route::get('dashboard/stats', [DashboardController::class, 'getStats']);
+        Route::get('dashboard/recent-properties', [DashboardController::class, 'getRecentProperties']);
 
         // Photo management routes
         Route::post('listings/{listing}/photos', [ListingPhotoController::class, 'store']);

@@ -184,11 +184,49 @@ class Listing extends Model
      */
     public function deletePhotoFiles(): void
     {
+        $directories = [];
+
         foreach ($this->photos as $photo) {
             // Supprimer le fichier physique
             if (Storage::disk($photo->disk)->exists($photo->path)) {
                 Storage::disk($photo->disk)->delete($photo->path);
+
+                // Collecter le dossier parent pour nettoyage
+                $directory = dirname($photo->path);
+                if (!in_array($directory, $directories)) {
+                    $directories[] = $directory;
+                }
             }
+        }
+
+        // Supprimer les dossiers vides
+        foreach ($directories as $directory) {
+            $this->deleteEmptyDirectory($directory, 'public');
+        }
+    }
+
+    /**
+     * Supprimer un dossier s'il est vide
+     */
+    private function deleteEmptyDirectory(string $directory, string $disk = 'public'): void
+    {
+        try {
+            // Vérifier si le dossier existe
+            if (!Storage::disk($disk)->exists($directory)) {
+                return;
+            }
+
+            // Lister le contenu du dossier
+            $files = Storage::disk($disk)->files($directory);
+            $directories = Storage::disk($disk)->directories($directory);
+
+            // Si le dossier est vide (pas de fichiers ni de sous-dossiers)
+            if (empty($files) && empty($directories)) {
+                Storage::disk($disk)->deleteDirectory($directory);
+            }
+        } catch (\Exception $e) {
+            // Log l'erreur mais ne pas faire échouer la suppression du listing
+            \Log::warning("Impossible de supprimer le dossier vide {$directory}: " . $e->getMessage());
         }
     }
 }
