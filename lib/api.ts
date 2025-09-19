@@ -71,7 +71,14 @@ async function apiRequest<T>(
   };
 
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    // S'assurer que l'URL est correctement formée
+    const url = endpoint.startsWith('/')
+      ? `${API_BASE_URL}${endpoint}`
+      : `${API_BASE_URL}/${endpoint}`;
+
+    console.log('API Request URL:', url); // Debug temporaire
+
+    const response = await fetch(url, config);
     const data = await response.json();
 
     if (!response.ok) {
