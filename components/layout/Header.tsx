@@ -190,8 +190,8 @@ export function Header() {
                 <Image
                   src="/logo.png"
                   alt="Guida-Center Logo"
-                  width={24}
-                  height={24}
+                  width={50}
+                  height={50}
                   className="h-6 w-6 object-contain"
                 />
               </div>

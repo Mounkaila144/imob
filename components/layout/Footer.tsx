@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Home, Mail, Phone, MapPin } from 'lucide-react';
 
 export function Footer() {
@@ -7,12 +8,20 @@ export function Footer() {
       <div className="container py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Home className="h-6 w-6 text-primary" />
+            <div className="flex items-center space-x-3">
+              <div className="bg-white p-2 rounded-lg shadow-sm">
+                <Image
+                  src="/logo.png"
+                  alt="Guida-Center Logo"
+                  width={24}
+                  height={24}
+                  className="h-6 w-6 object-contain"
+                />
+              </div>
               <span className="font-bold text-xl">Guida-Center</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              La plateforme immobilière moderne qui simplifie l'achat, la vente et la location de biens immobiliers.
+              La plateforme immobilière moderne qui simplifie l'achat, la vente et la location de biens immobiliers au Niger.
             </p>
           </div>
           
@@ -20,17 +29,17 @@ export function Footer() {
             <h3 className="font-semibold">Navigation</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/properties" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
                   Toutes les annonces
                 </Link>
               </li>
               <li>
-                <Link href="/properties?transactionType=sale" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/?type=sale" className="text-muted-foreground hover:text-foreground transition-colors">
                   Acheter
                 </Link>
               </li>
               <li>
-                <Link href="/properties?transactionType=rent" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/?type=rent" className="text-muted-foreground hover:text-foreground transition-colors">
                   Louer
                 </Link>
               </li>
@@ -63,15 +72,19 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-center space-x-2">
                 <Mail className="h-4 w-4" />
-                <span>contact@Guida-Center.com</span>
+                <a href="mailto:contact@guida-center.com" className="hover:text-foreground transition-colors">
+                  contact@guida-center.com
+                </a>
               </li>
               <li className="flex items-center space-x-2">
                 <Phone className="h-4 w-4" />
-                <span>01 23 45 67 89</span>
+                <a href="tel:+22770705560" className="hover:text-foreground transition-colors">
+                  +227 70 70 55 60
+                </a>
               </li>
               <li className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4" />
-                <span>Paris, France</span>
+                <span>Niamey, Niger - Bobiel</span>
               </li>
             </ul>
           </div>

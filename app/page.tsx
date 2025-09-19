@@ -54,6 +54,27 @@ export default function HomePage() {
     e.preventDefault();
     if (searchQuery.trim()) {
       setFilters(prev => ({ ...prev, search: searchQuery }));
+    } else {
+      // Si la recherche est vide, supprimer le filtre de recherche
+      setFilters(prev => {
+        const newFilters = { ...prev };
+        delete newFilters.search;
+        return newFilters;
+      });
+    }
+  };
+
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+
+    // Si l'utilisateur efface complètement le champ, supprimer automatiquement le filtre
+    if (!value.trim() && filters.search) {
+      setFilters(prev => {
+        const newFilters = { ...prev };
+        delete newFilters.search;
+        return newFilters;
+      });
     }
   };
 
@@ -91,7 +112,7 @@ export default function HomePage() {
                     type="text"
                     placeholder="Rechercher..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={handleSearchInputChange}
                     className="h-10 flex-1"
                   />
                   <Button type="submit" size="sm" className="h-10 px-4">
