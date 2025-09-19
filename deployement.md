@@ -105,8 +105,18 @@ PORT=3040
 
 ### Commandes de Déploiement Next.js
 ```bash
-# Installer les dépendances
-npm install
+# Nettoyer le cache npm (en cas de problème)
+npm cache clean --force
+
+# Supprimer les dépendances existantes si problème
+# rm -rf node_modules package-lock.json
+
+# Installer les dépendances avec options de récupération
+npm install --no-optional --legacy-peer-deps
+
+# Alternative si npm échoue
+# npm install --force
+# ou utiliser yarn: yarn install
 
 # Construire pour la production
 npm run build
@@ -179,7 +189,7 @@ Créer le fichier `/etc/apache2/sites-available/guidacenter.com.conf` :
     RewriteRule ^/storage/(.*)$ /var/www/imob/imobackend/storage/app/public/$1 [L]
 
     # Everything else - proxy to Next.js on port 3040
-    RewriteCond %{REQUEST_URI} !^/api/
+    RewriteCond %{REQUEST_URhttps://github.com/Mounkaila144/imob.gitI} !^/api/
     RewriteCond %{REQUEST_URI} !^/storage/
     RewriteRule ^/(.*)$ http://localhost:3040/$1 [P,L]
 

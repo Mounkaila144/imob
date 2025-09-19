@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
+import { adminDashboardApi } from '@/lib/api';
 
 interface AdminDashboardStats {
   users: {
@@ -67,24 +68,8 @@ export function useAdminDashboard() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('http://localhost:8000/api/admin/dashboard/stats', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Erreur lors du chargement des statistiques admin');
-      }
-
-      if (data.success) {
-        setStats(data.data);
-      } else {
-        throw new Error(data.message || 'Erreur lors du chargement des statistiques admin');
-      }
+      const data = await adminDashboardApi.getStats();
+      setStats(data);
     } catch (err) {
       console.error('Erreur lors du chargement du dashboard admin:', err);
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
