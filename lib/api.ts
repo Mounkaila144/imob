@@ -452,6 +452,18 @@ export const listingsApi = {
   },
 };
 
+// Admin Dashboard API
+export const adminDashboardApi = {
+  getStats: async (): Promise<any> => {
+    const token = localStorage.getItem('auth_token');
+    return apiRequest('admin/dashboard/stats', {
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+  },
+};
+
 export { ApiError };
 export type {
   ApiResponse,
