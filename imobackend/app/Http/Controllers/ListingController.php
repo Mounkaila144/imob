@@ -57,9 +57,42 @@ class ListingController extends ApiController
             $query->where('bedrooms', $request->bedrooms);
         }
 
-        // Recherche textuelle
+        // Recherche textuelle avancée
         if ($request->filled('search')) {
-            $query->whereFullText(['title', 'description', 'city'], $request->search);
+            $searchTerm = $request->search;
+
+            // Recherche avec FULLTEXT MySQL (recherche exacte et par mots-clés)
+            $query->where(function ($subQuery) use ($searchTerm) {
+                // Recherche FULLTEXT dans toutes les colonnes indexées
+                $subQuery->whereFullText([
+                    'title', 'description', 'city', 'address_line1',
+                    'address_line2', 'state', 'postal_code'
+                ], $searchTerm)
+
+                // Recherche LIKE approximative pour tolérance aux erreurs
+                ->orWhere('title', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('description', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('city', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('address_line1', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('address_line2', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('state', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('postal_code', 'LIKE', "%{$searchTerm}%")
+
+                // Recherche par type de propriété
+                ->orWhere('property_type', 'LIKE', "%{$searchTerm}%")
+
+                // Recherche par mots individuels pour plus de flexibilité
+                ->orWhere(function ($wordQuery) use ($searchTerm) {
+                    $words = explode(' ', $searchTerm);
+                    foreach ($words as $word) {
+                        if (strlen(trim($word)) > 2) { // Ignorer les mots trop courts
+                            $wordQuery->orWhere('title', 'LIKE', "%{$word}%")
+                                     ->orWhere('description', 'LIKE', "%{$word}%")
+                                     ->orWhere('city', 'LIKE', "%{$word}%");
+                        }
+                    }
+                });
+            });
         }
 
         // Recherche géographique
