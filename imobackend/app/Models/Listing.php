@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Listing extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
         'user_id',
@@ -165,5 +165,30 @@ class Listing extends Model
     public function incrementViews(): void
     {
         $this->increment('views_count');
+    }
+
+    // Boot method to handle model events
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Quand un listing est supprimé (hard delete)
+        static::deleting(function ($listing) {
+            // Supprimer physiquement les fichiers photos
+            $listing->deletePhotoFiles();
+        });
+    }
+
+    /**
+     * Supprimer tous les fichiers photos associés au listing
+     */
+    public function deletePhotoFiles(): void
+    {
+        foreach ($this->photos as $photo) {
+            // Supprimer le fichier physique
+            if (Storage::disk($photo->disk)->exists($photo->path)) {
+                Storage::disk($photo->disk)->delete($photo->path);
+            }
+        }
     }
 }

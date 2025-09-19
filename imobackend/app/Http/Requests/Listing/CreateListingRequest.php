@@ -32,7 +32,7 @@ class CreateListingRequest extends FormRequest
 
             // Prix
             'price' => 'required|numeric|min:0|max:999999999999.99',
-            'currency' => 'sometimes|string|size:3|in:EUR,USD,GBP',
+            'currency' => 'sometimes|string|size:3|in:XOF,USD,GBP',
             'rent_period' => 'required_if:type,rent|nullable|in:monthly,weekly,daily',
             'deposit_amount' => 'nullable|numeric|min:0|max:999999999999.99',
             'lease_min_months' => 'nullable|integer|min:1|max:120',
@@ -112,7 +112,7 @@ class CreateListingRequest extends FormRequest
 
         // Définir la devise par défaut
         if (!$this->has('currency')) {
-            $this->merge(['currency' => 'EUR']);
+            $this->merge(['currency' => 'XOF']);
         }
 
         // Définir le code pays par défaut

@@ -130,7 +130,7 @@ export default function AdminPropertiesPage() {
 
     const formatted = new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: 'XOF',
       minimumFractionDigits: 0,
     }).format(typeof price === 'number' ? price : price?.amount || 0);
 

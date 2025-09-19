@@ -277,7 +277,7 @@ class ListingController extends ApiController
             'title' => $listing->title
         ]);
 
-        // Soft delete
+        // Hard delete définitif
         $listing->delete();
 
         return $this->successResponse(
@@ -294,8 +294,7 @@ class ListingController extends ApiController
         $user = auth('api')->user();
 
         $query = $user->listings()
-            ->with(['photos', 'amenities'])
-            ->withTrashed(); // Inclure les supprimées
+            ->with(['photos', 'amenities']);
 
         // Filtres
         if ($request->filled('status')) {
@@ -338,21 +337,26 @@ class ListingController extends ApiController
         $originalSlug = $slug;
         $count = 1;
 
+        // Vérifier l'existence du slug initial
+        while ($this->slugExists($slug, $excludeId)) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
+        return $slug;
+    }
+
+    /**
+     * Check if slug exists in database
+     */
+    private function slugExists(string $slug, ?int $excludeId = null): bool
+    {
         $query = Listing::where('slug', $slug);
+
         if ($excludeId) {
             $query->where('id', '!=', $excludeId);
         }
 
-        while ($query->exists()) {
-            $slug = $originalSlug . '-' . $count;
-            $count++;
-
-            $query = Listing::where('slug', $slug);
-            if ($excludeId) {
-                $query->where('id', '!=', $excludeId);
-            }
-        }
-
-        return $slug;
+        return $query->exists();
     }
 }

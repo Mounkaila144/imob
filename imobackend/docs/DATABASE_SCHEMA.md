@@ -532,7 +532,7 @@ CREATE TABLE listings (
 
     -- Prix/Location
     price DECIMAL(15,2) NOT NULL,
-    currency CHAR(3) DEFAULT 'EUR',
+    currency CHAR(3) DEFAULT 'XOF',
     rent_period ENUM('monthly', 'weekly', 'daily') NULL,
     deposit_amount DECIMAL(15,2) NULL,
     lease_min_months SMALLINT NULL,
@@ -763,7 +763,7 @@ CREATE TABLE deals (
     admin_id BIGINT UNSIGNED NOT NULL,
     type ENUM('purchase', 'rent') NOT NULL,
     agreed_price DECIMAL(15,2) NULL,
-    currency CHAR(3) DEFAULT 'EUR',
+    currency CHAR(3) DEFAULT 'XOF',
     deposit_amount DECIMAL(15,2) NULL,
     lease_months SMALLINT NULL,
     start_date DATE NULL,

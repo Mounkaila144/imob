@@ -455,7 +455,7 @@ curl -X POST $API_BASE/listings \
     "type": "rent",
     "property_type": "apartment",
     "price": 2500,
-    "currency": "EUR",
+    "currency": "XOF",
     "rent_period": "monthly",
     "deposit_amount": 5000,
     "lease_min_months": 12,
@@ -527,7 +527,7 @@ curl -X GET "$API_BASE/my-listings?status=published&per_page=10" \
       "status": "published",
       "price": {
         "amount": 2500,
-        "currency": "EUR",
+        "currency": "XOF",
         "formatted": "2 500 CFA",
         "rent_period": "monthly"
       },
@@ -706,7 +706,7 @@ create_response=$(curl -s -X POST $API_BASE/listings \
     "type": "rent",
     "property_type": "apartment",
     "price": 1500,
-    "currency": "EUR",
+    "currency": "XOF",
     "rent_period": "monthly",
     "area_size": 50,
     "area_unit": "m2",

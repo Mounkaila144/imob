@@ -22,7 +22,7 @@ return new class extends Migration
 
             // Prix/location
             $table->decimal('price', 15, 2);
-            $table->char('currency', 3)->default('EUR')->index();
+            $table->char('currency', 3)->default('XOF')->index();
             $table->enum('rent_period', ['monthly', 'weekly', 'daily'])->nullable();
             $table->decimal('deposit_amount', 15, 2)->nullable();
             $table->smallInteger('lease_min_months')->nullable();

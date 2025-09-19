@@ -35,7 +35,7 @@ class UpdateListingRequest extends FormRequest
 
             // Prix
             'price' => 'sometimes|numeric|min:0|max:999999999999.99',
-            'currency' => 'sometimes|string|size:3|in:EUR,USD,GBP',
+            'currency' => 'sometimes|string|size:3|in:XOF,USD,GBP',
             'rent_period' => 'nullable|in:monthly,weekly,daily',
             'deposit_amount' => 'nullable|numeric|min:0|max:999999999999.99',
             'lease_min_months' => 'nullable|integer|min:1|max:120',

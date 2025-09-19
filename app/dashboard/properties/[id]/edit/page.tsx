@@ -24,7 +24,7 @@ const editListingSchema = z.object({
   type: z.enum(['sale', 'rent']),
   property_type: z.enum(['apartment', 'house', 'villa', 'land', 'office', 'shop', 'warehouse', 'other']),
   price: z.number().min(1, 'Le prix doit être supérieur à 0'),
-  currency: z.string().default('EUR'),
+  currency: z.string().default('XOF'),
   area_size: z.preprocess((val) => val === "" || val === null || val === undefined ? undefined : Number(val), z.number().min(1, 'La superficie doit être supérieure à 0').optional()),
   area_unit: z.string().default('m2'),
   rooms: z.preprocess((val) => val === "" || val === null || val === undefined ? undefined : Number(val), z.number().min(0).optional()),
@@ -333,7 +333,7 @@ export default function EditPropertyPage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="price">Prix * (EUR)</Label>
+                <Label htmlFor="price">Prix * (CFA)</Label>
                 <Input
                   id="price"
                   type="number"
@@ -365,7 +365,7 @@ export default function EditPropertyPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="deposit_amount">Dépôt de garantie (EUR)</Label>
+                    <Label htmlFor="deposit_amount">Dépôt de garantie (CFA)</Label>
                     <Input
                       id="deposit_amount"
                       type="number"

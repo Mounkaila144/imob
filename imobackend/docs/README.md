@@ -55,7 +55,7 @@ Toutes les réponses de l'API suivent ce format :
 {
   "success": false,
   "message": "Message d'erreur",
-  "error_code": "CODE_ERREUR",
+  "error_code": "CODE_ERRXOF",
   "errors": { ... }
 }
 ```
@@ -263,7 +263,7 @@ GET /api/listings?type=rent&city=Paris&min_price=2000&max_price=3000&per_page=20
       "status": "published",
       "price": {
         "amount": 2500,
-        "currency": "EUR",
+        "currency": "XOF",
         "formatted": "2 500 CFA",
         "rent_period": "monthly"
       },
@@ -321,7 +321,7 @@ GET /api/listings/{id}
     "status": "published",
     "price": {
       "amount": 2500,
-      "currency": "EUR",
+      "currency": "XOF",
       "formatted": "2 500 CFA/mois",
       "rent_period": "monthly",
       "deposit_amount": 5000,
@@ -401,7 +401,7 @@ Authorization: Bearer {token}
   "type": "rent",
   "property_type": "apartment",
   "price": 2500,
-  "currency": "EUR",
+  "currency": "XOF",
   "rent_period": "monthly",
   "deposit_amount": 5000,
   "lease_min_months": 12,

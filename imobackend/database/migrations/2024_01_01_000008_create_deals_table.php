@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('admin_id')->index()->constrained('users')->onDelete('cascade');
             $table->enum('type', ['purchase', 'rent'])->index();
             $table->decimal('agreed_price', 15, 2)->nullable();
-            $table->char('currency', 3)->default('EUR');
+            $table->char('currency', 3)->default('XOF');
             $table->decimal('deposit_amount', 15, 2)->nullable();
             $table->smallInteger('lease_months')->nullable();
             $table->date('start_date')->nullable();

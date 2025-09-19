@@ -89,7 +89,7 @@ export function PropertyMap({
   const formatPrice = (price: number, transactionType: string) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: 'XOF',
       minimumFractionDigits: 0,
     }).format(price) + (transactionType === 'rent' ? '/mois' : '');
   };

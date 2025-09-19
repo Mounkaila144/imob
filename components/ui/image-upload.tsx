@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { X, Upload, Star, StarOff, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';
+import { compressMultipleImages, getImageInfo } from '@/lib/image-compression';
 
 interface Photo {
   id: number;
@@ -36,6 +37,7 @@ export function ImageUpload({
   disabled = false,
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
+  const [compressing, setCompressing] = useState(false);
   const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -52,15 +54,9 @@ export function ImageUpload({
     // Vérifier les types de fichiers
     const validFiles = files.filter(file => {
       const isValidType = file.type.startsWith('image/');
-      const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB
 
       if (!isValidType) {
         toast.error(`${file.name} n'est pas une image valide`);
-        return false;
-      }
-
-      if (!isValidSize) {
-        toast.error(`${file.name} est trop volumineux (max 5MB)`);
         return false;
       }
 
@@ -70,15 +66,38 @@ export function ImageUpload({
     if (validFiles.length === 0) return;
 
     try {
+      setCompressing(true);
+
+      // Afficher les tailles originales
+      validFiles.forEach(file => {
+        const info = getImageInfo(file);
+        console.log(`Image originale: ${info.name} - ${info.sizeFormatted}`);
+      });
+
+      // Compresser les images
+      toast.info('Compression des images en cours...');
+      const compressedFiles = await compressMultipleImages(validFiles, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        quality: 0.8,
+      });
+
+      // Afficher les tailles après compression
+      compressedFiles.forEach(file => {
+        const info = getImageInfo(file);
+        console.log(`Image compressée: ${info.name} - ${info.sizeFormatted}`);
+      });
+
+      setCompressing(false);
       setUploading(true);
 
       if (onUpload && listingId) {
-        // Upload vers le serveur
-        const uploadedPhotos = await onUpload(validFiles);
+        // Upload vers le serveur avec les images compressées
+        const uploadedPhotos = await onUpload(compressedFiles);
         onPhotosChange([...photos, ...uploadedPhotos]);
       } else {
-        // Mode preview (création)
-        const previewPhotos: Photo[] = validFiles.map((file, index) => ({
+        // Mode preview (création) avec les images compressées
+        const previewPhotos: Photo[] = compressedFiles.map((file, index) => ({
           id: Date.now() + index, // ID temporaire
           url: URL.createObjectURL(file),
           is_cover: photos.length === 0 && index === 0,
@@ -87,10 +106,18 @@ export function ImageUpload({
         onPhotosChange([...photos, ...previewPhotos]);
       }
 
-      toast.success(`${validFiles.length} photo(s) ajoutée(s)`);
+      const totalSavedSize = validFiles.reduce((acc, file, index) => {
+        return acc + (file.size - compressedFiles[index].size);
+      }, 0);
+
+      const savedSizeMB = (totalSavedSize / (1024 * 1024)).toFixed(2);
+      toast.success(
+        `${compressedFiles.length} photo(s) ajoutée(s) et compressées (${savedSizeMB} MB économisés)`
+      );
     } catch (error: any) {
-      toast.error(error.message || 'Erreur lors de l\'upload');
+      toast.error(error.message || 'Erreur lors du traitement des images');
     } finally {
+      setCompressing(false);
       setUploading(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -167,10 +194,10 @@ export function ImageUpload({
           type="button"
           variant="outline"
           onClick={() => fileInputRef.current?.click()}
-          disabled={disabled || uploading || photos.length >= maxPhotos}
+          disabled={disabled || uploading || compressing || photos.length >= maxPhotos}
         >
           <Upload className="h-4 w-4 mr-2" />
-          {uploading ? 'Upload...' : 'Ajouter des photos'}
+          {compressing ? 'Compression...' : uploading ? 'Upload...' : 'Ajouter des photos'}
         </Button>
 
         <input
@@ -254,7 +281,7 @@ export function ImageUpload({
               type="button"
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
-              disabled={disabled || uploading}
+              disabled={disabled || uploading || compressing}
             >
               Ajouter la première photo
             </Button>
@@ -265,7 +292,8 @@ export function ImageUpload({
       {/* Instructions */}
       <div className="text-xs text-gray-500 space-y-1">
         <p>• Formats acceptés : JPEG, PNG, WebP</p>
-        <p>• Taille maximale : 5MB par image</p>
+        <p>• Les images seront automatiquement compressées pour optimiser la taille</p>
+        <p>• Résolution maximale : 1920px, qualité optimisée à 80%</p>
         <p>• Maximum {maxPhotos} photos par propriété</p>
         <p>• La première photo sera utilisée comme couverture</p>
       </div>

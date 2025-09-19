@@ -31,7 +31,7 @@ export default function AdminSettingsPage() {
     siteDescription: 'Plateforme immobilière moderne',
     contactEmail: 'contact@Guida-Center.fr',
     supportPhone: '+33 1 23 45 67 89',
-    currency: 'EUR',
+    currency: 'XOF',
     language: 'fr',
     timezone: 'Europe/Paris',
     allowRegistration: true,
@@ -137,7 +137,7 @@ export default function AdminSettingsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="EUR">Euro (CFA)</SelectItem>
+                    <SelectItem value="CFA">Franc (CFA)</SelectItem>
                     <SelectItem value="USD">Dollar US ($)</SelectItem>
                     <SelectItem value="GBP">Livre Sterling (£)</SelectItem>
                   </SelectContent>
