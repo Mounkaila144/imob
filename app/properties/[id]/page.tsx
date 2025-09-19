@@ -282,49 +282,47 @@ export default function PropertyDetailPage() {
               </CardHeader>
               <CardContent>
                 {(() => {
-                  const chars = listing.characteristics || {};
-
                   const characteristics = [
-                    chars.area_size && {
+                    listing.area_size && {
                       icon: <Ruler className="h-5 w-5 text-blue-600" />,
                       bg: "bg-blue-100",
-                      value: `${chars.area_size} ${chars.area_unit || 'm²'}`,
+                      value: `${listing.area_size} ${listing.area_unit || 'm²'}`,
                       label: "Superficie"
                     },
-                    chars.rooms && {
+                    listing.rooms && {
                       icon: <Home className="h-5 w-5 text-green-600" />,
                       bg: "bg-green-100",
-                      value: chars.rooms,
+                      value: listing.rooms,
                       label: "Pièces"
                     },
-                    chars.bedrooms && {
+                    listing.bedrooms && {
                       icon: <Bed className="h-5 w-5 text-purple-600" />,
                       bg: "bg-purple-100",
-                      value: chars.bedrooms,
+                      value: listing.bedrooms,
                       label: "Chambres"
                     },
-                    chars.bathrooms && {
+                    listing.bathrooms && {
                       icon: <Bath className="h-5 w-5 text-cyan-600" />,
                       bg: "bg-cyan-100",
-                      value: chars.bathrooms,
+                      value: listing.bathrooms,
                       label: "Salles de bain"
                     },
-                    chars.parking_spaces && {
+                    listing.parking_spaces && {
                       icon: <Car className="h-5 w-5 text-orange-600" />,
                       bg: "bg-orange-100",
-                      value: chars.parking_spaces,
+                      value: listing.parking_spaces,
                       label: "Places de parking"
                     },
-                    chars.floor && {
+                    listing.floor && {
                       icon: <Building className="h-5 w-5 text-indigo-600" />,
                       bg: "bg-indigo-100",
-                      value: chars.floor,
+                      value: listing.floor,
                       label: "Étage"
                     },
-                    chars.year_built && {
+                    listing.year_built && {
                       icon: <Calendar className="h-5 w-5 text-yellow-600" />,
                       bg: "bg-yellow-100",
-                      value: chars.year_built,
+                      value: listing.year_built,
                       label: "Année de construction"
                     }
                   ].filter(Boolean);
@@ -340,7 +338,7 @@ export default function PropertyDetailPage() {
 
                   return (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {characteristics.map((char, index) => (
+                      {characteristics.map((char: any, index) => (
                         <div key={index} className="flex items-center space-x-3">
                           <div className={`w-10 h-10 ${char.bg} rounded-full flex items-center justify-center`}>
                             {char.icon}
@@ -381,16 +379,16 @@ export default function PropertyDetailPage() {
                     </div>
                   </div>
                   <div className="space-y-4">
-                    {listing.available_from && (
+                    {(listing as any).available_from && (
                       <div>
                         <p className="text-sm font-medium text-gray-600">Disponible à partir du</p>
-                        <p className="text-lg">{new Date(listing.available_from).toLocaleDateString('fr-FR')}</p>
+                        <p className="text-lg">{new Date((listing as any).available_from).toLocaleDateString('fr-FR')}</p>
                       </div>
                     )}
-                    {listing.expires_at && (
+                    {(listing as any).expires_at && (
                       <div>
                         <p className="text-sm font-medium text-gray-600">Expire le</p>
-                        <p className="text-lg">{new Date(listing.expires_at).toLocaleDateString('fr-FR')}</p>
+                        <p className="text-lg">{new Date((listing as any).expires_at).toLocaleDateString('fr-FR')}</p>
                       </div>
                     )}
                     <div>
@@ -410,9 +408,9 @@ export default function PropertyDetailPage() {
               <CardContent>
                 {listing.amenities && listing.amenities.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
-                    {listing.amenities.map((amenity) => (
-                      <Badge key={amenity} variant="outline">
-                        {amenity}
+                    {listing.amenities.map((amenity: any) => (
+                      <Badge key={amenity.id || amenity.code} variant="outline">
+                        {amenity.label || amenity}
                       </Badge>
                     ))}
                   </div>
@@ -444,8 +442,8 @@ export default function PropertyDetailPage() {
                     {listing.location.postal_code && (
                       <p className="text-gray-600">{listing.location.postal_code}</p>
                     )}
-                    {listing.location.state && (
-                      <p className="text-gray-600">{listing.location.state}</p>
+                    {(listing.location as any).state && (
+                      <p className="text-gray-600">{(listing.location as any).state}</p>
                     )}
                   </div>
 

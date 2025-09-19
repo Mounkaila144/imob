@@ -34,12 +34,21 @@ const mockProperties: Property[] = [
     ],
     documents: [],
     sellerId: '1',
-    seller: { id: '1', email: 'seller@example.com', name: 'John Seller', role: 'seller', createdAt: new Date(), updatedAt: new Date() },
+    seller: {
+      id: 1,
+      email: 'seller@example.com',
+      name: 'John Seller',
+      role: 'lister',
+      status: 'active',
+      profile: { avatar_path: '', company: '', about: '' },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
     status: 'active',
     viewCount: 156,
     favoriteCount: 23,
-    createdAt: new Date(2024, 0, 15),
-    updatedAt: new Date(2024, 0, 20),
+    createdAt: new Date(2024, 0, 15).toISOString(),
+    updatedAt: new Date(2024, 0, 20).toISOString(),
   },
   {
     id: '2',
@@ -68,12 +77,12 @@ const mockProperties: Property[] = [
     ],
     documents: [],
     sellerId: '2',
-    seller: { id: '2', email: 'seller2@example.com', name: 'Jane Seller', role: 'seller', createdAt: new Date(), updatedAt: new Date() },
+    seller: { id: 2, email: 'seller2@example.com', name: 'Jane Seller', role: 'lister', status: 'active', profile: {}, created_at: '', updated_at: '' } as any,
     status: 'active',
     viewCount: 89,
     favoriteCount: 12,
-    createdAt: new Date(2024, 0, 10),
-    updatedAt: new Date(2024, 0, 18),
+    createdAt: new Date(2024, 0, 10).toISOString(),
+    updatedAt: new Date(2024, 0, 18).toISOString(),
   }
 ];
 

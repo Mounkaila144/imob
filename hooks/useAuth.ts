@@ -56,7 +56,7 @@ export function useAuthProvider() {
         console.log('Attempting to fetch user profile...');
         const userData = await authApi.getProfile();
         console.log('User profile fetched successfully:', userData);
-        setUser(userData);
+        setUser(userData as any);
 
         // Redirection automatique pour les admins
         if (userData.role === 'admin' && !window.location.pathname.startsWith('/admin')) {
@@ -87,7 +87,7 @@ export function useAuthProvider() {
     setLoading(true);
     try {
       const response = await authApi.login({ email, password });
-      setUser(response.user);
+      setUser(response.user as any);
       setToken(response.token);
 
       // Redirection automatique après login
@@ -124,7 +124,7 @@ export function useAuthProvider() {
         company: userData.company,
         about: userData.about,
       });
-      setUser(response.user);
+      setUser(response.user as any);
       setToken(response.token);
 
       // Redirection automatique après inscription
@@ -168,7 +168,7 @@ export function useAuthProvider() {
   const refreshUser = async () => {
     try {
       const userData = await authApi.getProfile();
-      setUser(userData);
+      setUser(userData as any);
     } catch (error) {
       console.error('Failed to refresh user:', error);
       logout();

@@ -690,7 +690,7 @@ export default function AdminPropertiesPage() {
                 <div>
                   <Label>Photos ({selectedProperty.photos.length})</Label>
                   <div className="grid grid-cols-4 gap-2 mt-2">
-                    {selectedProperty.photos.slice(0, 8).map((photo) => (
+                    {selectedProperty.photos.slice(0, 8).map((photo: any) => (
                       <img
                         key={photo.id}
                         src={photo.url}

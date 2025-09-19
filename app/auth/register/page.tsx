@@ -42,7 +42,7 @@ export default function RegisterPage() {
         email: data.email,
         password: data.password,
         confirmPassword: data.confirmPassword,
-        role: data.role === 'seller' ? 'lister' : 'client',
+        role: data.role,
         phone: data.phone,
       };
       await registerUser(userData);
@@ -120,18 +120,18 @@ export default function RegisterPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="role">Type de compte</Label>
-                <Select value={selectedRole} onValueChange={(value: 'seller' | 'buyer') => setValue('role', value)}>
+                <Select value={selectedRole} onValueChange={(value: 'lister' | 'client') => setValue('role', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Choisissez votre profil" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="buyer">
+                    <SelectItem value="client">
                       <div className="flex items-center gap-2">
                         <ShoppingCart className="h-4 w-4" />
                         Acheteur/Locataire
                       </div>
                     </SelectItem>
-                    <SelectItem value="seller">
+                    <SelectItem value="lister">
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4" />
                         Vendeur/Propriétaire
@@ -222,10 +222,10 @@ export default function RegisterPage() {
             {selectedRole && (
               <div className="mt-6 p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm font-medium text-blue-900 mb-2">
-                  Profil {selectedRole === 'buyer' ? 'Acheteur/Locataire' : 'Vendeur/Propriétaire'} :
+                  Profil {selectedRole === 'client' ? 'Acheteur/Locataire' : 'Vendeur/Propriétaire'} :
                 </p>
                 <p className="text-sm text-blue-700">
-                  {selectedRole === 'buyer' 
+                  {selectedRole === 'client'
                     ? 'Recherchez et sauvegardez vos biens favoris, demandez des visites et gérez vos demandes.'
                     : 'Publiez et gérez vos annonces immobilières, recevez les demandes de visite et suivez vos performances.'
                   }

@@ -36,13 +36,13 @@ export default function HomePage() {
 
     searchParams.forEach((value, key) => {
       if (key === 'search' || key === 'city' || key === 'property_type') {
-        initialFilters[key as keyof SearchFilters] = value;
+        (initialFilters as any)[key] = value;
       } else if (key === 'type' && (value === 'sale' || value === 'rent')) {
         initialFilters.type = value;
       } else if (key === 'min_price' || key === 'max_price' || key === 'rooms' || key === 'bedrooms') {
         const numValue = Number(value);
         if (!isNaN(numValue)) {
-          initialFilters[key as keyof SearchFilters] = numValue;
+          (initialFilters as any)[key] = numValue;
         }
       }
     });

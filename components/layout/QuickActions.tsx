@@ -39,7 +39,7 @@ export function QuickActions() {
         size: 'sm' as const
       });
 
-      if (user?.role === 'buyer') {
+      if (user?.role === 'client') {
         actions.push({
           href: '/buyer/favorites',
           label: 'Favoris',
@@ -83,7 +83,7 @@ export function QuickActions() {
     }
 
     // Seller specific actions
-    if (user?.role === 'seller') {
+    if (user?.role === 'lister') {
       actions.push({
         href: '/seller/properties/new',
         label: 'Nouvelle annonce',
@@ -111,8 +111,8 @@ export function QuickActions() {
           <Button
             key={index}
             asChild
-            variant={action.variant}
-            size={action.size}
+            variant={action.variant as any}
+            size={action.size as any}
             className={action.className}
           >
             <Link href={action.href} className="flex items-center space-x-1">

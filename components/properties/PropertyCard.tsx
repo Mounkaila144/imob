@@ -24,7 +24,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (user?.role === 'buyer') {
+    if (user?.role === 'client') {
       toggleFavorite(property.id);
     }
   };
@@ -62,7 +62,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
             </Badge>
           </div>
 
-          {user?.role === 'buyer' && (
+          {user?.role === 'client' && (
             <Button
               size="icon"
               variant="ghost"

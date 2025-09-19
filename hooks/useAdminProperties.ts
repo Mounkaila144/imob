@@ -268,7 +268,7 @@ export function useAdminProperties() {
       const updatedProperties = properties.data.map(property =>
         property.id === propertyId ? { ...property, status } : property
       );
-      setProperties({ ...properties, data: updatedProperties });
+      setProperties({ ...properties, data: updatedProperties as any });
     }
 
     return response;
@@ -283,7 +283,7 @@ export function useAdminProperties() {
     // Supprimer de la liste locale
     if (properties) {
       const updatedProperties = properties.data.filter(property => property.id !== propertyId);
-      setProperties({ ...properties, data: updatedProperties });
+      setProperties({ ...properties, data: updatedProperties as any });
     }
   };
 

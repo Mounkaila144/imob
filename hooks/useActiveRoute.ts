@@ -25,12 +25,13 @@ export function useActiveRoute() {
       const hrefParams = new URLSearchParams(queryString);
       
       // Check if all href params match current URL params
-      for (const [key, value] of hrefParams.entries()) {
+      const entries = Array.from(hrefParams.entries());
+      for (const [key, value] of entries) {
         if (searchParams.get(key) !== value) {
           return false;
         }
       }
-      
+
       return true;
     };
   }, [pathname, searchParams]);

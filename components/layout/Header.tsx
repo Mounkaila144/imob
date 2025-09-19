@@ -255,7 +255,7 @@ export function Header() {
             {user ? (
               <>
                 {/* Add Property Button for Sellers */}
-                {user.role === 'seller' && (
+                {user.role === 'lister' && (
                   <Button
                     asChild
                     size="sm"
@@ -273,7 +273,7 @@ export function Header() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full ring-2 ring-transparent hover:ring-blue-200 transition-all duration-200">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={user.avatar} alt={user.name || user.email} />
+                        <AvatarImage src={(user as any).avatar} alt={user.name || user.email} />
                         <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold">
                           {user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
                         </AvatarFallback>
@@ -285,7 +285,7 @@ export function Header() {
                     <DropdownMenuLabel className="font-normal p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg mb-2">
                       <div className="flex items-center space-x-3">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage src={user.avatar} alt={user.name || user.email} />
+                          <AvatarImage src={(user as any).avatar} alt={user.name || user.email} />
                           <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
                             {user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
                           </AvatarFallback>
@@ -317,7 +317,7 @@ export function Header() {
                       </DropdownMenuItem>
                     )}
 
-                    {user.role === 'seller' && (
+                    {user.role === 'lister' && (
                       <>
                         <DropdownMenuItem asChild className="p-3 rounded-lg hover:bg-blue-50 transition-colors">
                           <Link href="/seller" className="flex items-center space-x-3">
@@ -344,7 +344,7 @@ export function Header() {
                       </>
                     )}
 
-                    {user.role === 'buyer' && (
+                    {user.role === 'client' && (
                       <>
                         <DropdownMenuItem asChild className="p-3 rounded-lg hover:bg-blue-50 transition-colors">
                           <Link href="/buyer" className="flex items-center space-x-3">
@@ -514,7 +514,7 @@ export function Header() {
                         <div className="space-y-4">
                           <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
                             <Avatar className="h-10 w-10">
-                              <AvatarImage src={user.avatar} alt={user.name || user.email} />
+                              <AvatarImage src={(user as any).avatar} alt={user.name || user.email} />
                               <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
                                 {user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
                               </AvatarFallback>
@@ -525,7 +525,7 @@ export function Header() {
                             </div>
                           </div>
 
-                          {user.role === 'seller' && (
+                          {user.role === 'lister' && (
                             <Button
                               asChild
                               className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
