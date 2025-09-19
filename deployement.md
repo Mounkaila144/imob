@@ -124,121 +124,52 @@ pm2 startup
 Créer le fichier `/etc/apache2/sites-available/guidacenter.com.conf` :
 
 ```apache
-<VirtualHost *:443>
-    ServerName guidacenter.com
-    DocumentRoot /var/www/imob/imobackend/public
+ <VirtualHost *:443>
+      ServerName commandesansfrontiere.com
+      DocumentRoot /var/www/html
 
-    # Configuration SSL
-    SSLEngine on
-    SSLCertificateFile /etc/letsencrypt/live/guidacenter.com/fullchain.pem
-    SSLCertificateKeyFile /etc/letsencrypt/live/guidacenter.com/privkey.pem
-    Include /etc/letsencrypt/options-ssl-apache.conf
+      # SSL Configuration
+      SSLEngine on
+      SSLCertificateFile /etc/letsencrypt/live/commandesansfrontiere.com/fullchain.pem
+      SSLCertificateKeyFile /etc/letsencrypt/live/commandesansfrontiere.com/privkey.pem
+      Include /etc/letsencrypt/options-ssl-apache.conf
 
-    # Configuration PHP 8.2
-    <FilesMatch \.php$>
-        SetHandler "proxy:unix:/var/run/php/php8.2-fpm.sock|fcgi://localhost"
-    </FilesMatch>
+      # Enable RewriteEngine
+      RewriteEngine On
 
-    # Configuration du répertoire Laravel
-    <Directory /var/www/imob/imobackend/public>
-        Options -Indexes +FollowSymLinks
-        AllowOverride All
-        Require all granted
+      # Handle API requests - rewrite to Laravel backend
+      RewriteCond %{REQUEST_URI} ^/api/(.*)$
+      RewriteRule ^/api/(.*)$ /var/www/imob/commande-backend/public/index.php [L]
 
-        # Configuration pour Laravel
-        RewriteEngine On
+      # Handle storage files - serve from Laravel
+      RewriteCond %{REQUEST_URI} ^/storage/(.*)$
+      RewriteRule ^/storage/(.*)$ /var/www/imob/commande-backend/storage/app/public/$1 [L]
 
-        # Proxy pour l'API vers le backend Laravel
-        RewriteCond %{REQUEST_URI} ^/api/
-        RewriteCond %{REQUEST_FILENAME} !-d
-        RewriteCond %{REQUEST_FILENAME} !-f
-        RewriteRule ^(.*)$ index.php [QSA,L]
+      # Everything else - proxy to Next.js
+      RewriteCond %{REQUEST_URI} !^/api/
+      RewriteCond %{REQUEST_URI} !^/storage/
+      RewriteRule ^/(.*)$ http://localhost:3040/$1 [P,L]
 
-        # Proxy pour le frontend Next.js (toutes les autres requêtes)
-        RewriteCond %{REQUEST_URI} !^/api/
-        RewriteCond %{REQUEST_URI} !^/storage/
-        RewriteCond %{REQUEST_FILENAME} !-d
-        RewriteCond %{REQUEST_FILENAME} !-f
-        RewriteRule ^(.*)$ http://localhost:3000/$1 [P,L]
-    </Directory>
+      # Enable proxy modules
+      ProxyRequests Off
+      ProxyPreserveHost On
 
-    # Sécurité - Bloquer l'accès aux fichiers sensibles
-    <Directory /var/www/imob/imobackend>
-        <Files ".env">
-            Require all denied
-        </Files>
-        <Files "composer.json">
-            Require all denied
-        </Files>
-        <Files "composer.lock">
-            Require all denied
-        </Files>
-        <Files "artisan">
-            Require all denied
-        </Files>
-    </Directory>
+      # Laravel backend directory configuration
+      <Directory /var/www/imob/imobackend/public>
+          Options -Indexes +FollowSymLinks
+          AllowOverride All
+          Require all granted
+          DirectoryIndex index.php
+      </Directory>
 
-    # Bloquer l'accès aux dossiers Laravel sensibles
-    <DirectoryMatch "^/var/www/imob/imobackend/(app|bootstrap|config|database|resources|routes|tests|vendor)">
-        Require all denied
-    </DirectoryMatch>
-
-    # Headers de sécurité
-    Header always set X-Content-Type-Options nosniff
-    Header always set X-Frame-Options DENY
-    Header always set X-XSS-Protection "1; mode=block"
-    Header always set Referrer-Policy "strict-origin-when-cross-origin"
-    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
-
-    # Compression
-    <IfModule mod_deflate.c>
-        AddOutputFilterByType DEFLATE text/plain
-        AddOutputFilterByType DEFLATE text/html
-        AddOutputFilterByType DEFLATE text/xml
-        AddOutputFilterByType DEFLATE text/css
-        AddOutputFilterByType DEFLATE application/xml
-        AddOutputFilterByType DEFLATE application/xhtml+xml
-        AddOutputFilterByType DEFLATE application/rss+xml
-        AddOutputFilterByType DEFLATE application/javascript
-        AddOutputFilterByType DEFLATE application/x-javascript
-        AddOutputFilterByType DEFLATE application/json
-    </IfModule>
-
-    # Cache pour les assets statiques
-    <IfModule mod_expires.c>
-        ExpiresActive On
-        ExpiresByType text/css "access plus 1 year"
-        ExpiresByType application/javascript "access plus 1 year"
-        ExpiresByType image/png "access plus 1 year"
-        ExpiresByType image/jpg "access plus 1 year"
-        ExpiresByType image/jpeg "access plus 1 year"
-        ExpiresByType image/gif "access plus 1 year"
-        ExpiresByType image/svg+xml "access plus 1 year"
-        ExpiresByType image/webp "access plus 1 year"
-        ExpiresByType font/woff "access plus 1 year"
-        ExpiresByType font/woff2 "access plus 1 year"
-    </IfModule>
-
-    # Logs spécifiques
-    LogLevel info
-    ErrorLog   ${APACHE_LOG_DIR}/guidacenter-error.log
-    CustomLog  ${APACHE_LOG_DIR}/guidacenter-access.log combined
-</VirtualHost>
-
-# Redirection HTTP vers HTTPS
-<VirtualHost *:80>
-    ServerName guidacenter.com
-    DocumentRoot /var/www/imob/imobackend/public
-
-    # Redirection permanente vers HTTPS
-    RewriteEngine On
-    RewriteCond %{HTTPS} off
-    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
-
-    # Logs pour le HTTP aussi
-    ErrorLog   ${APACHE_LOG_DIR}/guidacenter-http-error.log
-    CustomLog  ${APACHE_LOG_DIR}/guidacenter-http-access.log combined
-</VirtualHost>
+      # Storage directory configuration
+      Alias /storage /var/www/imob/commande-backend/storage/app/public
+      <Directory /var/www/imob/commande-backend/storage/app/public>
+          Options -Indexes +FollowSymLinks
+          AllowOverride None
+          Require all granted
+      </Directory>
+  </VirtualHost>
 ```
 
 ### Activation du Site
