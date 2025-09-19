@@ -1,5 +1,6 @@
 'use client';
 
+import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -24,19 +25,39 @@ interface AdminLayoutProps {
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
+  const { user, loading, logout } = useAuth();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Mock user temporaire
-  const user = {
-    name: 'Admin Test',
-    role: 'admin'
-  };
+  useEffect(() => {
+    if (!loading && (!user || user.role !== 'admin')) {
+      router.push('/');
+    }
+  }, [user, loading, router]);
 
   const handleLogout = async () => {
-    console.log('Logout clicked');
-    router.push('/');
+    try {
+      await logout();
+      router.push('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-300">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || user.role !== 'admin') {
+    return null;
+  }
 
   const navigation = [
     {
@@ -124,7 +145,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <div className="flex items-center">
                   <div className="ml-3">
                     <p className="text-sm font-medium text-gray-200 group-hover:text-white">
-                      {user.name}
+                      {user?.name || user?.email}
                     </p>
                     <p className="text-xs font-medium text-gray-400 group-hover:text-gray-300">
                       Administrateur
@@ -168,7 +189,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <div className="ml-3 relative">
                 <div className="flex items-center space-x-3">
                   <div className="hidden md:block">
-                    <p className="text-sm font-medium text-gray-200">{user.name}</p>
+                    <p className="text-sm font-medium text-gray-200">{user?.name || user?.email}</p>
                   </div>
                   <Button
                     variant="ghost"
