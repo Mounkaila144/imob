@@ -18,6 +18,18 @@ export function ListingCard({ listing }: ListingCardProps) {
 
   const coverPhoto = listing.photos?.find(p => p.is_cover) || listing.photos?.[0];
 
+  // Fonction pour générer une URL de thumbnail
+  const getThumbnailUrl = (originalUrl: string, width = 300, height = 200) => {
+    // Si l'URL contient déjà des paramètres de redimensionnement, la retourner telle quelle
+    if (originalUrl.includes('w=') || originalUrl.includes('h=')) {
+      return originalUrl;
+    }
+
+    // Ajouter les paramètres de redimensionnement à l'URL
+    const separator = originalUrl.includes('?') ? '&' : '?';
+    return `${originalUrl}${separator}w=${width}&h=${height}&fit=cover&q=70`;
+  };
+
   const getTypeLabel = (type: string) => {
     switch (type) {
       case 'apartment': return 'Appartement';
@@ -47,10 +59,14 @@ export function ListingCard({ listing }: ListingCardProps) {
           {coverPhoto ? (
             <div className="relative h-32 w-full overflow-hidden rounded-t-xl">
               <Image
-                src={coverPhoto.url}
+                src={getThumbnailUrl(coverPhoto.url)}
                 alt={listing.title}
                 fill
+                sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
+                loading="lazy"
+                placeholder="blur"
+                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkrHR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAhEQACAQIEBwAAAAAAAAAAAAABAgMABAUREiExQVFhkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
               />
             </div>
           ) : (
