@@ -359,16 +359,28 @@ cat .env.local
 
 ### Commandes de Maintenance Next.js
 ```bash
-# Redéployer le frontend
+# Mise à jour complète du frontend
 cd /var/www/imob
+
+# Arrêter PM2
+pm2 stop imob-frontend
+
+# Récupérer les modifications
+git pull origin main
+
+# Réinstaller les dépendances si nécessaire
+npm install --no-optional --legacy-peer-deps
+
+# Construire
 npm run build
-pm2 restart imob-frontend
+
+# Redémarrer PM2
+pm2 start ecosystem.config.js
 
 # Vérifier les logs PM2
 pm2 logs imob-frontend
 
-# Redémarrer PM2 si nécessaire
-pm2 restart imob-frontend
+# Vérifier le statut
 pm2 status
 
 # Recharger la configuration PM2

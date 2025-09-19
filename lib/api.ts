@@ -1,4 +1,18 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+// Déterminer l'URL de base selon l'environnement
+const getApiBaseUrl = () => {
+  // En production, utiliser l'URL de production
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname === 'guidacenter.com' || hostname.includes('guidacenter')) {
+      return 'https://guidacenter.com/api';
+    }
+  }
+
+  // Sinon utiliser la variable d'environnement ou localhost par défaut
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 interface ApiResponse<T> {
   success: boolean;
@@ -77,6 +91,8 @@ async function apiRequest<T>(
       : `${API_BASE_URL}/${endpoint}`;
 
     console.log('API Request URL:', url); // Debug temporaire
+    console.log('API_BASE_URL:', API_BASE_URL); // Debug temporaire
+    console.log('Hostname:', typeof window !== 'undefined' ? window.location.hostname : 'server-side'); // Debug temporaire
 
     const response = await fetch(url, config);
     const data = await response.json();
