@@ -16,7 +16,8 @@ import {
   Menu,
   X,
   Bell,
-  User
+  User,
+  Handshake
 } from 'lucide-react';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -74,6 +75,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       name: 'Propriétés',
       href: '/admin/properties',
       icon: Home,
+    },
+    {
+      name: 'Partenaires',
+      href: '/admin/partners',
+      icon: Handshake,
     },
   ];
 

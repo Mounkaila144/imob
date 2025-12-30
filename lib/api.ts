@@ -1,15 +1,6 @@
 // Déterminer l'URL de base selon l'environnement
 const getApiBaseUrl = () => {
-  // En production, utiliser l'URL de production
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    if (hostname === 'guidacenter.com' || hostname.includes('guidacenter')) {
-      return 'https://guidacenter.com/api';
-    }
-  }
-
-  // Sinon utiliser la variable d'environnement ou localhost par défaut
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+    return process.env.NEXT_PUBLIC_API_URL;
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -493,6 +484,194 @@ export const adminDashboardApi = {
   },
 };
 
+// Partner types for API
+interface PartnerResponse {
+  id: number;
+  name: string;
+  logo_url: string | null;
+  logo_path: string | null;
+  sort_order: number;
+  is_active: boolean;
+  website_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface PartnerPublicResponse {
+  id: number;
+  name: string;
+  logo_url: string | null;
+  website_url: string | null;
+}
+
+interface PaginatedPartnerResponse {
+  data: PartnerResponse[];
+  pagination: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    has_more_pages: boolean;
+  };
+}
+
+// Partners API - Public
+export const partnersApi = {
+  // Get all active partners for homepage carousel
+  async getPublicPartners(): Promise<PartnerPublicResponse[]> {
+    return apiRequest<PartnerPublicResponse[]>('/partners');
+  },
+};
+
+// Admin Partners API
+export const adminPartnersApi = {
+  // Get all partners with pagination
+  async getPartners(params?: {
+    is_active?: boolean;
+    search?: string;
+    per_page?: number;
+    page?: number;
+  }): Promise<PaginatedPartnerResponse> {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+
+    const endpoint = queryParams.toString()
+      ? `/admin/partners?${queryParams.toString()}`
+      : '/admin/partners';
+    return apiRequest<PaginatedPartnerResponse>(endpoint);
+  },
+
+  // Get a specific partner
+  async getPartner(id: number): Promise<PartnerResponse> {
+    return apiRequest<PartnerResponse>(`/admin/partners/${id}`);
+  },
+
+  // Create a new partner
+  async createPartner(data: {
+    name: string;
+    logo: File;
+    sort_order?: number;
+    is_active?: boolean;
+    website_url?: string;
+  }): Promise<PartnerResponse> {
+    const formData = new FormData();
+    formData.append('name', data.name);
+    formData.append('logo', data.logo);
+    if (data.sort_order !== undefined) {
+      formData.append('sort_order', data.sort_order.toString());
+    }
+    if (data.is_active !== undefined) {
+      formData.append('is_active', data.is_active ? '1' : '0');
+    }
+    if (data.website_url) {
+      formData.append('website_url', data.website_url);
+    }
+
+    const token = localStorage.getItem('auth_token');
+    const response = await fetch(`${API_BASE_URL}/admin/partners`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new ApiError(
+        result.message || 'Erreur lors de la création du partenaire',
+        response.status,
+        result.errors
+      );
+    }
+
+    return result.data;
+  },
+
+  // Update a partner
+  async updatePartner(
+    id: number,
+    data: {
+      name?: string;
+      logo?: File;
+      sort_order?: number;
+      is_active?: boolean;
+      website_url?: string | null;
+    }
+  ): Promise<PartnerResponse> {
+    const formData = new FormData();
+    if (data.name) {
+      formData.append('name', data.name);
+    }
+    if (data.logo) {
+      formData.append('logo', data.logo);
+    }
+    if (data.sort_order !== undefined) {
+      formData.append('sort_order', data.sort_order.toString());
+    }
+    if (data.is_active !== undefined) {
+      formData.append('is_active', data.is_active ? '1' : '0');
+    }
+    if (data.website_url !== undefined) {
+      formData.append('website_url', data.website_url || '');
+    }
+
+    const token = localStorage.getItem('auth_token');
+    const response = await fetch(`${API_BASE_URL}/admin/partners/${id}`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new ApiError(
+        result.message || 'Erreur lors de la mise à jour du partenaire',
+        response.status,
+        result.errors
+      );
+    }
+
+    return result.data;
+  },
+
+  // Delete a partner
+  async deletePartner(id: number): Promise<void> {
+    return apiRequest(`/admin/partners/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Reorder partners
+  async reorderPartners(
+    partners: Array<{ id: number; sort_order: number }>
+  ): Promise<void> {
+    return apiRequest('/admin/partners/reorder', {
+      method: 'PUT',
+      body: JSON.stringify({ partners }),
+    });
+  },
+
+  // Toggle partner active status
+  async toggleActive(id: number): Promise<PartnerResponse> {
+    return apiRequest<PartnerResponse>(`/admin/partners/${id}/toggle-active`, {
+      method: 'PUT',
+    });
+  },
+};
+
 export { ApiError };
 export type {
   ApiResponse,
@@ -501,5 +680,8 @@ export type {
   RegisterRequest,
   ListingResponse,
   PaginatedListingResponse,
-  CreateListingRequest
+  CreateListingRequest,
+  PartnerResponse,
+  PartnerPublicResponse,
+  PaginatedPartnerResponse
 };

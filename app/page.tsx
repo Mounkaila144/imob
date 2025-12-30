@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ListingCard } from '@/components/properties/ListingCard';
+import { PartnersCarousel } from '@/components/partners/PartnersCarousel';
 import { usePublicListings } from '@/hooks/useListings';
 import { Search, Home, SlidersHorizontal } from 'lucide-react';
 
@@ -174,6 +175,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Partners Carousel */}
+      <PartnersCarousel />
 
     </div>
   );

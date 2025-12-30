@@ -101,14 +101,6 @@ export interface PaginatedProperties {
 
 // Déterminer l'URL de base selon l'environnement
 const getApiBaseUrl = () => {
-  // En production, utiliser l'URL de production
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    if (hostname === 'guidacenter.com' || hostname.includes('guidacenter')) {
-      return 'https://guidacenter.com/api';
-    }
-  }
-
   // Sinon utiliser la variable d'environnement ou localhost par défaut
   return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 };

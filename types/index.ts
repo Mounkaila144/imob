@@ -125,3 +125,22 @@ export interface Activity {
   user?: User;
   property?: Property;
 }
+
+export interface Partner {
+  id: number;
+  name: string;
+  logo_url: string | null;
+  logo_path: string | null;
+  sort_order: number;
+  is_active: boolean;
+  website_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PartnerPublic {
+  id: number;
+  name: string;
+  logo_url: string | null;
+  website_url: string | null;
+}

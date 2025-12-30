@@ -37,9 +37,9 @@ const createListingSchema = z.object({
   postal_code: z.string().optional(),
   latitude: z.number(),
   longitude: z.number(),
-  rent_period: z.string().optional(),
+  rent_period: z.enum(['monthly', 'weekly', 'daily']).optional(),
   deposit_amount: z.number().min(0).optional(),
-  lease_min_months: z.number().min(1).optional(),
+  lease_min_duration: z.number().min(1).optional(),
 });
 
 type CreateListingFormData = z.infer<typeof createListingSchema>;

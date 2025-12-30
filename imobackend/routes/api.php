@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ListingPhotoController;
 use App\Http\Controllers\DashboardController;
@@ -38,6 +39,9 @@ Route::group(['prefix' => 'auth'], function () {
 Route::get('listings', [ListingController::class, 'index']);
 Route::get('listings/{listing}', [ListingController::class, 'show']);
 
+// Public Partners Route (for homepage carousel)
+Route::get('partners', [PartnerController::class, 'publicIndex']);
+
 // Protected Routes
 Route::middleware(['auth:api', 'active.user'])->group(function () {
 
@@ -57,6 +61,17 @@ Route::middleware(['auth:api', 'active.user'])->group(function () {
             Route::put('/{user}/status', [UserController::class, 'updateStatus']);
             Route::put('/{user}/role', [UserController::class, 'updateRole']);
             Route::delete('/{user}', [UserController::class, 'destroy']);
+        });
+
+        // Partner management routes
+        Route::prefix('admin/partners')->group(function () {
+            Route::get('/', [PartnerController::class, 'index']);
+            Route::post('/', [PartnerController::class, 'store']);
+            Route::get('/{partner}', [PartnerController::class, 'show']);
+            Route::post('/{partner}', [PartnerController::class, 'update']); // POST for file upload
+            Route::delete('/{partner}', [PartnerController::class, 'destroy']);
+            Route::put('/reorder', [PartnerController::class, 'reorder']);
+            Route::put('/{partner}/toggle-active', [PartnerController::class, 'toggleActive']);
         });
     });
 
