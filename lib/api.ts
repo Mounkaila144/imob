@@ -152,9 +152,9 @@ interface ListingResponse {
     amount: number;
     currency: string;
     formatted: string;
-    rent_period?: string;
+    rent_period?: 'monthly' | 'weekly' | 'daily';
     deposit_amount?: number;
-    lease_min_months?: number;
+    lease_min_duration?: number; // Durée minimum en jours/semaines/mois selon rent_period
   };
   area_size?: number;
   area_unit?: string;
@@ -226,9 +226,9 @@ interface CreateListingRequest {
   property_type: 'apartment' | 'house' | 'villa' | 'land' | 'office' | 'shop' | 'warehouse' | 'other';
   price: number;
   currency?: string;
-  rent_period?: string;
+  rent_period?: 'monthly' | 'weekly' | 'daily';
   deposit_amount?: number;
-  lease_min_months?: number;
+  lease_min_duration?: number; // Durée minimum en jours/semaines/mois selon rent_period
   area_size?: number;
   area_unit?: string;
   rooms?: number;

@@ -69,6 +69,33 @@ export default function CreatePropertyPage() {
 
   const watchType = watch('type');
   const watchPropertyType = watch('property_type');
+  const watchRentPeriod = watch('rent_period');
+
+  // Fonction pour obtenir le label de durée selon la période
+  const getDurationLabel = () => {
+    switch (watchRentPeriod) {
+      case 'daily':
+        return 'Durée minimum (jours)';
+      case 'weekly':
+        return 'Durée minimum (semaines)';
+      case 'monthly':
+      default:
+        return 'Durée minimum (mois)';
+    }
+  };
+
+  // Fonction pour obtenir le placeholder selon la période
+  const getDurationPlaceholder = () => {
+    switch (watchRentPeriod) {
+      case 'daily':
+        return '1';
+      case 'weekly':
+        return '1';
+      case 'monthly':
+      default:
+        return '12';
+    }
+  };
 
   const onSubmit = async (data: CreateListingFormData) => {
     try {
@@ -97,7 +124,7 @@ export default function CreatePropertyPage() {
         longitude: data.longitude,
         rent_period: data.type === 'rent' ? data.rent_period : undefined,
         deposit_amount: data.type === 'rent' ? data.deposit_amount : undefined,
-        lease_min_months: data.type === 'rent' ? data.lease_min_months : undefined,
+        lease_min_duration: data.type === 'rent' ? data.lease_min_duration : undefined,
       };
 
       // Créer la propriété
@@ -307,12 +334,12 @@ export default function CreatePropertyPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="lease_min_months">Durée minimum (mois)</Label>
+                    <Label htmlFor="lease_min_duration">{getDurationLabel()}</Label>
                     <Input
-                      id="lease_min_months"
+                      id="lease_min_duration"
                       type="number"
-                      placeholder="12"
-                      {...register('lease_min_months', { valueAsNumber: true })}
+                      placeholder={getDurationPlaceholder()}
+                      {...register('lease_min_duration', { valueAsNumber: true })}
                     />
                   </div>
                 </>

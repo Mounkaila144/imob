@@ -38,9 +38,9 @@ const editListingSchema = z.object({
   postal_code: z.preprocess((val) => val === null || val === undefined ? '' : val, z.string().optional()),
   latitude: z.number(),
   longitude: z.number(),
-  rent_period: z.string().optional(),
+  rent_period: z.enum(['monthly', 'weekly', 'daily']).optional(),
   deposit_amount: z.preprocess((val) => val === "" || val === null || val === undefined ? undefined : Number(val), z.number().optional()),
-  lease_min_months: z.preprocess((val) => val === "" || val === null || val === undefined ? undefined : Number(val), z.number().optional()),
+  lease_min_duration: z.preprocess((val) => val === "" || val === null || val === undefined ? undefined : Number(val), z.number().min(1).optional()),
 }).refine((data) => {
   // Pour les locations, certains champs peuvent être requis mais on les laisse optionnels
   // La validation côté serveur se chargera des contraintes métier
@@ -72,6 +72,33 @@ export default function EditPropertyPage() {
   });
 
   const watchType = watch('type');
+  const watchRentPeriod = watch('rent_period');
+
+  // Fonction pour obtenir le label de durée selon la période
+  const getDurationLabel = () => {
+    switch (watchRentPeriod) {
+      case 'daily':
+        return 'Durée minimum (jours)';
+      case 'weekly':
+        return 'Durée minimum (semaines)';
+      case 'monthly':
+      default:
+        return 'Durée minimum (mois)';
+    }
+  };
+
+  // Fonction pour obtenir le placeholder selon la période
+  const getDurationPlaceholder = () => {
+    switch (watchRentPeriod) {
+      case 'daily':
+        return '1';
+      case 'weekly':
+        return '1';
+      case 'monthly':
+      default:
+        return '12';
+    }
+  };
 
   // Populate form when listing data is loaded
   useEffect(() => {
@@ -96,9 +123,9 @@ export default function EditPropertyPage() {
         postal_code: listing.location.postal_code || '',
         latitude: listing.location.coordinates.lat,
         longitude: listing.location.coordinates.lng,
-        rent_period: listing.price.rent_period || '',
+        rent_period: listing.price.rent_period || undefined,
         deposit_amount: listing.price.deposit_amount || undefined,
-        lease_min_months: listing.price.lease_min_months || undefined,
+        lease_min_duration: listing.price.lease_min_duration || undefined,
       });
 
       // Charger les photos existantes
@@ -154,7 +181,7 @@ export default function EditPropertyPage() {
         longitude: data.longitude,
         rent_period: data.type === 'rent' ? data.rent_period : undefined,
         deposit_amount: data.type === 'rent' ? data.deposit_amount : undefined,
-        lease_min_months: data.type === 'rent' ? data.lease_min_months : undefined,
+        lease_min_duration: data.type === 'rent' ? data.lease_min_duration : undefined,
       };
 
       await listingsApi.updateListing(listingId, listingData);
@@ -375,12 +402,12 @@ export default function EditPropertyPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="lease_min_months">Durée minimum (mois)</Label>
+                    <Label htmlFor="lease_min_duration">{getDurationLabel()}</Label>
                     <Input
-                      id="lease_min_months"
+                      id="lease_min_duration"
                       type="number"
-                      placeholder="12"
-                      {...register('lease_min_months', { valueAsNumber: true })}
+                      placeholder={getDurationPlaceholder()}
+                      {...register('lease_min_duration', { valueAsNumber: true })}
                     />
                   </div>
                 </>
