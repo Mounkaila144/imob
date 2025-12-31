@@ -44,6 +44,7 @@ export interface AdminProperty {
     url: string;
     is_cover: boolean;
   }[];
+  is_featured?: boolean;
   created_at: string;
   updated_at?: string;
 }

@@ -312,7 +312,7 @@ export default function CreatePropertyPage() {
                 <>
                   <div className="space-y-2">
                     <Label htmlFor="rent_period">Période</Label>
-                    <Select onValueChange={(value) => setValue('rent_period', value)}>
+                    <Select onValueChange={(value) => setValue('rent_period', value as 'monthly' | 'weekly' | 'daily')}>
                       <SelectTrigger>
                         <SelectValue placeholder="Choisir..." />
                       </SelectTrigger>
