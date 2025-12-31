@@ -146,7 +146,7 @@ interface ListingResponse {
   description?: string;
   slug: string;
   type: 'sale' | 'rent';
-  property_type: 'apartment' | 'house' | 'villa' | 'land' | 'office' | 'shop' | 'warehouse' | 'other';
+  property_type: 'apartment' | 'house' | 'villa' | 'land' | 'office' | 'shop' | 'warehouse' | 'hotel' | 'other';
   status: 'published' | 'draft' | 'pending' | 'suspended' | 'sold' | 'rented';
   price: {
     amount: number;
@@ -223,7 +223,7 @@ interface CreateListingRequest {
   title: string;
   description: string;
   type: 'sale' | 'rent';
-  property_type: 'apartment' | 'house' | 'villa' | 'land' | 'office' | 'shop' | 'warehouse' | 'other';
+  property_type: 'apartment' | 'house' | 'villa' | 'land' | 'office' | 'shop' | 'warehouse' | 'hotel' | 'other';
   price: number;
   currency?: string;
   rent_period?: 'monthly' | 'weekly' | 'daily';

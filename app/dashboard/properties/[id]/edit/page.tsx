@@ -18,33 +18,36 @@ import { useSingleListing } from '@/hooks/useListings';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { toast } from 'sonner';
 
+// Helper pour convertir les valeurs en nombre ou undefined
+const toNumberOrUndefined = (val: unknown): number | undefined => {
+  if (val === "" || val === null || val === undefined) return undefined;
+  const num = Number(val);
+  return isNaN(num) ? undefined : num;
+};
+
 const editListingSchema = z.object({
   title: z.string().min(5, 'Le titre doit contenir au moins 5 caractères'),
   description: z.string().min(20, 'La description doit contenir au moins 20 caractères'),
   type: z.enum(['sale', 'rent']),
-  property_type: z.enum(['apartment', 'house', 'villa', 'land', 'office', 'shop', 'warehouse', 'other']),
-  price: z.number().min(1, 'Le prix doit être supérieur à 0'),
+  property_type: z.enum(['apartment', 'house', 'villa', 'land', 'office', 'shop', 'warehouse', 'hotel', 'other']),
+  price: z.preprocess(toNumberOrUndefined, z.number().min(1, 'Le prix doit être supérieur à 0')),
   currency: z.string().default('XOF'),
-  area_size: z.preprocess((val) => val === "" || val === null || val === undefined ? undefined : Number(val), z.number().min(1, 'La superficie doit être supérieure à 0').optional()),
+  area_size: z.preprocess(toNumberOrUndefined, z.number().min(1, 'La superficie doit être supérieure à 0').optional()),
   area_unit: z.string().default('m2'),
-  rooms: z.preprocess((val) => val === "" || val === null || val === undefined ? undefined : Number(val), z.number().min(0).optional()),
-  bedrooms: z.preprocess((val) => val === "" || val === null || val === undefined ? undefined : Number(val), z.number().min(0).optional()),
-  bathrooms: z.preprocess((val) => val === "" || val === null || val === undefined ? undefined : Number(val), z.number().min(0).optional()),
-  parking_spaces: z.preprocess((val) => val === "" || val === null || val === undefined ? undefined : Number(val), z.number().min(0).optional()),
-  floor: z.preprocess((val) => val === "" || val === null || val === undefined ? undefined : Number(val), z.number().optional()),
-  year_built: z.preprocess((val) => val === "" || val === null || val === undefined ? undefined : Number(val), z.number().min(1800).max(new Date().getFullYear()).optional()),
+  rooms: z.preprocess(toNumberOrUndefined, z.number().min(0).optional()),
+  bedrooms: z.preprocess(toNumberOrUndefined, z.number().min(0).optional()),
+  bathrooms: z.preprocess(toNumberOrUndefined, z.number().min(0).optional()),
+  parking_spaces: z.preprocess(toNumberOrUndefined, z.number().min(0).optional()),
+  floor: z.preprocess(toNumberOrUndefined, z.number().optional()),
+  year_built: z.preprocess(toNumberOrUndefined, z.number().min(1800).max(new Date().getFullYear()).optional()),
   address_line1: z.string().min(5, 'L\'adresse doit contenir au moins 5 caractères'),
   city: z.string().min(2, 'La ville doit contenir au moins 2 caractères'),
   postal_code: z.preprocess((val) => val === null || val === undefined ? '' : val, z.string().optional()),
-  latitude: z.number(),
-  longitude: z.number(),
-  rent_period: z.enum(['monthly', 'weekly', 'daily']).optional(),
-  deposit_amount: z.preprocess((val) => val === "" || val === null || val === undefined ? undefined : Number(val), z.number().optional()),
-  lease_min_duration: z.preprocess((val) => val === "" || val === null || val === undefined ? undefined : Number(val), z.number().min(1).optional()),
-}).refine((data) => {
-  // Pour les locations, certains champs peuvent être requis mais on les laisse optionnels
-  // La validation côté serveur se chargera des contraintes métier
-  return true;
+  latitude: z.preprocess(toNumberOrUndefined, z.number({ required_error: 'La latitude est requise' })),
+  longitude: z.preprocess(toNumberOrUndefined, z.number({ required_error: 'La longitude est requise' })),
+  rent_period: z.enum(['monthly', 'weekly', 'daily']).optional().nullable(),
+  deposit_amount: z.preprocess(toNumberOrUndefined, z.number().optional()),
+  lease_min_duration: z.preprocess(toNumberOrUndefined, z.number().min(1).optional()),
 });
 
 type EditListingFormData = z.infer<typeof editListingSchema>;
@@ -103,13 +106,19 @@ export default function EditPropertyPage() {
   // Populate form when listing data is loaded
   useEffect(() => {
     if (listing) {
+      // Convertir rent_period en valeur valide pour l'enum
+      let rentPeriodValue: 'monthly' | 'weekly' | 'daily' | undefined = undefined;
+      if (listing.price.rent_period === 'monthly' || listing.price.rent_period === 'weekly' || listing.price.rent_period === 'daily') {
+        rentPeriodValue = listing.price.rent_period;
+      }
+
       reset({
         title: listing.title,
         description: listing.description || '',
         type: listing.type,
         property_type: listing.property_type,
         price: listing.price.amount,
-        currency: listing.price.currency,
+        currency: listing.price.currency || 'XOF',
         area_size: listing.area_size,
         area_unit: listing.area_unit || 'm2',
         rooms: listing.rooms,
@@ -123,7 +132,7 @@ export default function EditPropertyPage() {
         postal_code: listing.location.postal_code || '',
         latitude: listing.location.coordinates.lat,
         longitude: listing.location.coordinates.lng,
-        rent_period: listing.price.rent_period || undefined,
+        rent_period: rentPeriodValue,
         deposit_amount: listing.price.deposit_amount || undefined,
         lease_min_duration: listing.price.lease_min_duration || undefined,
       });
@@ -159,30 +168,61 @@ export default function EditPropertyPage() {
       setLoading(true);
       setError('');
 
+      // Préparer les données en filtrant les valeurs undefined/null/NaN
       const listingData: Partial<CreateListingRequest> = {
         title: data.title,
         description: data.description,
         type: data.type,
         property_type: data.property_type,
         price: data.price,
-        currency: data.currency,
-        area_size: data.area_size,
-        area_unit: data.area_unit,
-        rooms: data.rooms,
-        bedrooms: data.bedrooms,
-        bathrooms: data.bathrooms,
-        parking_spaces: data.parking_spaces,
-        floor: data.floor,
-        year_built: data.year_built,
+        currency: data.currency || 'XOF',
         address_line1: data.address_line1,
         city: data.city,
-        postal_code: data.postal_code,
         latitude: data.latitude,
         longitude: data.longitude,
-        rent_period: data.type === 'rent' ? data.rent_period : undefined,
-        deposit_amount: data.type === 'rent' ? data.deposit_amount : undefined,
-        lease_min_duration: data.type === 'rent' ? data.lease_min_duration : undefined,
       };
+
+      // Ajouter les champs optionnels seulement s'ils ont une valeur valide
+      if (data.area_size && !isNaN(data.area_size)) {
+        listingData.area_size = data.area_size;
+      }
+      if (data.area_unit) {
+        listingData.area_unit = data.area_unit;
+      }
+      if (data.rooms !== undefined && !isNaN(data.rooms)) {
+        listingData.rooms = data.rooms;
+      }
+      if (data.bedrooms !== undefined && !isNaN(data.bedrooms)) {
+        listingData.bedrooms = data.bedrooms;
+      }
+      if (data.bathrooms !== undefined && !isNaN(data.bathrooms)) {
+        listingData.bathrooms = data.bathrooms;
+      }
+      if (data.parking_spaces !== undefined && !isNaN(data.parking_spaces)) {
+        listingData.parking_spaces = data.parking_spaces;
+      }
+      if (data.floor !== undefined && !isNaN(data.floor)) {
+        listingData.floor = data.floor;
+      }
+      if (data.year_built && !isNaN(data.year_built)) {
+        listingData.year_built = data.year_built;
+      }
+      if (data.postal_code) {
+        listingData.postal_code = data.postal_code;
+      }
+
+      // Champs spécifiques à la location
+      if (data.type === 'rent') {
+        if (data.rent_period) {
+          listingData.rent_period = data.rent_period;
+        }
+        if (data.deposit_amount !== undefined && !isNaN(data.deposit_amount)) {
+          listingData.deposit_amount = data.deposit_amount;
+        }
+        if (data.lease_min_duration !== undefined && !isNaN(data.lease_min_duration)) {
+          listingData.lease_min_duration = data.lease_min_duration;
+        }
+      }
 
       await listingsApi.updateListing(listingId, listingData);
       toast.success('Propriété modifiée avec succès !');
@@ -308,7 +348,7 @@ export default function EditPropertyPage() {
               <div className="space-y-2">
                 <Label htmlFor="type">Type d'annonce *</Label>
                 <Select
-                  value={watchType}
+                  value={watchType || ''}
                   onValueChange={(value: 'sale' | 'rent') => setValue('type', value)}
                 >
                   <SelectTrigger>
@@ -327,7 +367,7 @@ export default function EditPropertyPage() {
               <div className="space-y-2">
                 <Label htmlFor="property_type">Type de propriété *</Label>
                 <Select
-                  value={watch('property_type')}
+                  value={watch('property_type') || ''}
                   onValueChange={(value) => setValue('property_type', value as any)}
                 >
                   <SelectTrigger>
@@ -337,6 +377,7 @@ export default function EditPropertyPage() {
                     <SelectItem value="apartment">Appartement</SelectItem>
                     <SelectItem value="house">Maison</SelectItem>
                     <SelectItem value="villa">Villa</SelectItem>
+                    <SelectItem value="hotel">Hôtel</SelectItem>
                     <SelectItem value="land">Terrain</SelectItem>
                     <SelectItem value="office">Bureau</SelectItem>
                     <SelectItem value="shop">Commerce</SelectItem>
@@ -365,7 +406,7 @@ export default function EditPropertyPage() {
                   id="price"
                   type="number"
                   placeholder="150000"
-                  {...register('price', { valueAsNumber: true })}
+                  {...register('price')}
                 />
                 {errors.price && (
                   <p className="text-sm text-red-600">{errors.price.message}</p>
@@ -377,8 +418,8 @@ export default function EditPropertyPage() {
                   <div className="space-y-2">
                     <Label htmlFor="rent_period">Période</Label>
                     <Select
-                      value={watch('rent_period')}
-                      onValueChange={(value) => setValue('rent_period', value)}
+                      value={watch('rent_period') || ''}
+                      onValueChange={(value: 'monthly' | 'weekly' | 'daily') => setValue('rent_period', value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Choisir..." />
@@ -397,7 +438,7 @@ export default function EditPropertyPage() {
                       id="deposit_amount"
                       type="number"
                       placeholder="1500"
-                      {...register('deposit_amount', { valueAsNumber: true })}
+                      {...register('deposit_amount')}
                     />
                   </div>
 
@@ -407,7 +448,7 @@ export default function EditPropertyPage() {
                       id="lease_min_duration"
                       type="number"
                       placeholder={getDurationPlaceholder()}
-                      {...register('lease_min_duration', { valueAsNumber: true })}
+                      {...register('lease_min_duration')}
                     />
                   </div>
                 </>
@@ -431,10 +472,10 @@ export default function EditPropertyPage() {
                     type="number"
                     placeholder="75"
                     className="flex-1"
-                    {...register('area_size', { valueAsNumber: true })}
+                    {...register('area_size')}
                   />
                   <Select
-                    value={watch('area_unit')}
+                    value={watch('area_unit') || 'm2'}
                     onValueChange={(value) => setValue('area_unit', value)}
                   >
                     <SelectTrigger className="w-24">
@@ -458,7 +499,7 @@ export default function EditPropertyPage() {
                   id="rooms"
                   type="number"
                   placeholder="3"
-                  {...register('rooms', { valueAsNumber: true })}
+                  {...register('rooms')}
                 />
               </div>
 
@@ -468,7 +509,7 @@ export default function EditPropertyPage() {
                   id="bedrooms"
                   type="number"
                   placeholder="2"
-                  {...register('bedrooms', { valueAsNumber: true })}
+                  {...register('bedrooms')}
                 />
               </div>
 
@@ -478,7 +519,7 @@ export default function EditPropertyPage() {
                   id="bathrooms"
                   type="number"
                   placeholder="1"
-                  {...register('bathrooms', { valueAsNumber: true })}
+                  {...register('bathrooms')}
                 />
               </div>
 
@@ -488,7 +529,7 @@ export default function EditPropertyPage() {
                   id="parking_spaces"
                   type="number"
                   placeholder="1"
-                  {...register('parking_spaces', { valueAsNumber: true })}
+                  {...register('parking_spaces')}
                 />
               </div>
 
@@ -498,7 +539,7 @@ export default function EditPropertyPage() {
                   id="floor"
                   type="number"
                   placeholder="2"
-                  {...register('floor', { valueAsNumber: true })}
+                  {...register('floor')}
                 />
               </div>
 
@@ -508,7 +549,7 @@ export default function EditPropertyPage() {
                   id="year_built"
                   type="number"
                   placeholder="2010"
-                  {...register('year_built', { valueAsNumber: true })}
+                  {...register('year_built')}
                 />
                 {errors.year_built && (
                   <p className="text-sm text-red-600">{errors.year_built.message}</p>
@@ -567,7 +608,7 @@ export default function EditPropertyPage() {
                   type="number"
                   step="any"
                   placeholder="48.8566"
-                  {...register('latitude', { valueAsNumber: true })}
+                  {...register('latitude')}
                 />
                 {errors.latitude && (
                   <p className="text-sm text-red-600">{errors.latitude.message}</p>
@@ -581,7 +622,7 @@ export default function EditPropertyPage() {
                   type="number"
                   step="any"
                   placeholder="2.3522"
-                  {...register('longitude', { valueAsNumber: true })}
+                  {...register('longitude')}
                 />
                 {errors.longitude && (
                   <p className="text-sm text-red-600">{errors.longitude.message}</p>

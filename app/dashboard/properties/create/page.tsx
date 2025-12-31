@@ -21,7 +21,7 @@ const createListingSchema = z.object({
   title: z.string().min(5, 'Le titre doit contenir au moins 5 caractères'),
   description: z.string().min(20, 'La description doit contenir au moins 20 caractères'),
   type: z.enum(['sale', 'rent']),
-  property_type: z.enum(['apartment', 'house', 'villa', 'land', 'office', 'shop', 'warehouse', 'other']),
+  property_type: z.enum(['apartment', 'house', 'villa', 'land', 'office', 'shop', 'warehouse', 'hotel', 'other']),
   price: z.number().min(1, 'Le prix doit être supérieur à 0'),
   currency: z.string().default('XOF'),
   area_size: z.number().min(1, 'La superficie doit être supérieure à 0').optional(),
@@ -272,6 +272,7 @@ export default function CreatePropertyPage() {
                     <SelectItem value="apartment">Appartement</SelectItem>
                     <SelectItem value="house">Maison</SelectItem>
                     <SelectItem value="villa">Villa</SelectItem>
+                    <SelectItem value="hotel">Hôtel</SelectItem>
                     <SelectItem value="land">Terrain</SelectItem>
                     <SelectItem value="office">Bureau</SelectItem>
                     <SelectItem value="shop">Commerce</SelectItem>
