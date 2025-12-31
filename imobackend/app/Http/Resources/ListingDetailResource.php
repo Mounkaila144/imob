@@ -20,6 +20,7 @@ class ListingDetailResource extends JsonResource
             'type' => $this->type,
             'property_type' => $this->property_type,
             'status' => $this->status,
+            'is_featured' => $this->is_featured ?? false,
 
             // Prix et conditions
             'price' => [

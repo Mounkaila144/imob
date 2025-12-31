@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAdminProperties } from '@/hooks/useAdminProperties';
+import { listingsApi } from '@/lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,7 +37,8 @@ import {
   Settings,
   PlayCircle,
   PauseCircle,
-  EyeOff
+  EyeOff,
+  Star
 } from 'lucide-react';
 import {
   Dialog,
@@ -57,7 +59,7 @@ export default function AdminPropertiesPage() {
   const [selectedProperty, setSelectedProperty] = useState<any>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showActionModal, setShowActionModal] = useState(false);
-  const [actionType, setActionType] = useState<'publish' | 'unpublish' | 'suspend' | 'delete' | 'change_status'>('publish');
+  const [actionType, setActionType] = useState<'publish' | 'unpublish' | 'suspend' | 'delete' | 'change_status' | 'toggle_featured'>('publish');
   const [newStatus, setNewStatus] = useState('');
   const { toast } = useToast();
 
@@ -161,6 +163,33 @@ export default function AdminPropertiesPage() {
       setActionType('change_status');
       setNewStatus(property.status);
       setShowActionModal(true);
+    } else if (action === 'toggle_featured') {
+      handleToggleFeatured(propertyId);
+    }
+  };
+
+  const handleToggleFeatured = async (propertyId: number) => {
+    try {
+      const property = properties.find(p => p.id === propertyId);
+      if (!property) return;
+
+      const currentFeaturedStatus = property.is_featured || false;
+      await listingsApi.toggleFeatured(propertyId, currentFeaturedStatus);
+
+      toast({
+        title: currentFeaturedStatus ? 'Annonce retirée de la vedette' : 'Annonce mise en vedette',
+        description: currentFeaturedStatus
+          ? 'Cette annonce ne sera plus affichée en première position'
+          : 'Cette annonce sera affichée en première position sur la page d\'accueil',
+      });
+
+      await fetchProperties();
+    } catch (error) {
+      toast({
+        title: 'Erreur',
+        description: error instanceof Error ? error.message : 'Impossible de modifier le statut vedette',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -546,6 +575,17 @@ export default function AdminPropertiesPage() {
                           className="text-gray-600 hover:text-blue-600"
                         >
                           <Eye className="h-4 w-4" />
+                        </Button>
+
+                        {/* Bouton Mettre en vedette */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={property.is_featured ? "text-yellow-500 hover:text-yellow-600" : "text-gray-400 hover:text-yellow-500"}
+                          onClick={() => handlePropertyAction('toggle_featured', property.id)}
+                          title={property.is_featured ? "Retirer de la vedette" : "Mettre en vedette"}
+                        >
+                          <Star className={`h-4 w-4 ${property.is_featured ? 'fill-yellow-500' : ''}`} />
                         </Button>
 
                         {/* Actions de statut */}

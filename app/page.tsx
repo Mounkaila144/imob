@@ -34,6 +34,14 @@ export default function HomePage() {
   // S'assurer que listings est toujours un tableau
   const safeListings = listings || [];
 
+  // Trier les annonces : annonces en vedette en premier
+  const sortedListings = [...safeListings].sort((a, b) => {
+    // Les annonces en vedette d'abord
+    if (a.is_featured && !b.is_featured) return -1;
+    if (!a.is_featured && b.is_featured) return 1;
+    return 0;
+  });
+
   // Initialize filters from URL params
   useEffect(() => {
     const initialFilters: SearchFilters = {};
@@ -433,7 +441,7 @@ export default function HomePage() {
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {safeListings.map((listing) => (
+                {sortedListings.map((listing) => (
                   <ListingCard key={listing.id} listing={listing} />
                 ))}
               </div>

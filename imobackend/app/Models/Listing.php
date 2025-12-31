@@ -43,6 +43,7 @@ class Listing extends Model
         'longitude',
         'available_from',
         'status',
+        'is_featured',
         'expires_at',
         'views_count',
         'features_json',
@@ -57,6 +58,7 @@ class Listing extends Model
         'area_size' => 'decimal:2',
         'latitude' => 'decimal:7',
         'longitude' => 'decimal:7',
+        'is_featured' => 'boolean',
     ];
 
     // Relationships
@@ -125,6 +127,11 @@ class Listing extends Model
     public function scopeInCity($query, $city)
     {
         return $query->where('city', $city);
+    }
+
+    public function scopeFeatured($query)
+    {
+        return $query->where('is_featured', true);
     }
 
     public function scopePriceBetween($query, $min, $max)

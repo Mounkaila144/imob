@@ -69,6 +69,9 @@ class UpdateListingRequest extends FormRequest
                 Rule::in(['draft', 'pending_review', 'published', 'rejected', 'archived', 'sold', 'rented'])
             ],
 
+            // Mise en vedette (seulement pour les admins)
+            'is_featured' => 'sometimes|boolean',
+
             // Équipements et features
             'amenity_ids' => 'nullable|array',
             'amenity_ids.*' => 'exists:amenities,id',
@@ -121,11 +124,17 @@ class UpdateListingRequest extends FormRequest
                 $validator->errors()->add('rent_period', 'La période de location est obligatoire pour les locations.');
             }
 
-            // Seuls les admins peuvent modifier le statut
             $user = auth('api')->user();
-            if ($this->has('status') &&
-                (!$user || !is_object($user) || !method_exists($user, 'isAdmin') || !$user->isAdmin())) {
+            $isAdmin = $user && is_object($user) && method_exists($user, 'isAdmin') && $user->isAdmin();
+
+            // Seuls les admins peuvent modifier le statut
+            if ($this->has('status') && !$isAdmin) {
                 $validator->errors()->add('status', 'Seuls les administrateurs peuvent modifier le statut.');
+            }
+
+            // Seuls les admins peuvent mettre en vedette
+            if ($this->has('is_featured') && !$isAdmin) {
+                $validator->errors()->add('is_featured', 'Seuls les administrateurs peuvent mettre une annonce en vedette.');
             }
         });
     }

@@ -148,6 +148,7 @@ interface ListingResponse {
   type: 'sale' | 'rent';
   property_type: 'apartment' | 'house' | 'villa' | 'land' | 'office' | 'shop' | 'warehouse' | 'hotel' | 'other';
   status: 'published' | 'draft' | 'pending' | 'suspended' | 'sold' | 'rented';
+  is_featured?: boolean;
   price: {
     amount: number;
     currency: string;
@@ -462,6 +463,14 @@ export const listingsApi = {
     return apiRequest(`/listings/${listingId}/photos/reorder`, {
       method: 'PUT',
       body: JSON.stringify({ photos }),
+    });
+  },
+
+  // Mettre en vedette / Retirer de la vedette (Admin uniquement)
+  async toggleFeatured(listingId: number, currentFeaturedStatus: boolean): Promise<ListingResponse> {
+    return apiRequest<ListingResponse>(`/listings/${listingId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ is_featured: !currentFeaturedStatus }),
     });
   },
 };

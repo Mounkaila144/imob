@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
-import { Heart, MapPin, Square, BedDouble, Bath, Car, MessageCircle } from 'lucide-react';
+import { Heart, MapPin, Square, BedDouble, Bath, Car, MessageCircle, Star } from 'lucide-react';
 
 interface ListingCardProps {
   listing: ListingResponse;
@@ -76,6 +76,14 @@ export function ListingCard({ listing }: ListingCardProps) {
           )}
 
           <div className="absolute top-2 left-2 flex gap-1">
+            {listing.is_featured && (
+              <Badge
+                className="px-2 py-1.5 font-bold text-xs shadow-lg backdrop-blur-sm border-0 rounded-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-white"
+              >
+                <Star className="h-3 w-3 mr-1 fill-white" />
+                Vedette
+              </Badge>
+            )}
             <Badge
               variant={listing.type === 'sale' ? 'default' : 'secondary'}
               className={`px-3 py-1.5 font-bold text-xs shadow-lg backdrop-blur-sm border-0 rounded-full ${
