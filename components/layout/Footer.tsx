@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Home, Mail, Phone, MapPin } from 'lucide-react';
+import { Home, Mail, Phone, MapPin, Heart } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="bg-muted/50 border-t">
+    <footer className="bg-muted/50 border-t px-3">
       <div className="container py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
@@ -91,7 +91,17 @@ export function Footer() {
         </div>
         
         <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; 2024 Guida-Center. Tous droits réservés.</p>
+          <p className="flex items-center justify-center gap-1">
+            &copy; 2026 Guida-Center. Tous droits réservés. Fait avec <Heart className="h-4 w-4 text-red-500 fill-red-500" /> par{' '}
+            <a
+              href="https://ptrniger.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors"
+            >
+              PTR-Niger
+            </a>
+          </p>
         </div>
       </div>
     </footer>
