@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SearchFilters } from '@/components/properties/SearchFilters';
 import { PropertyGrid } from '@/components/properties/PropertyGrid';
@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Grid, Map, SlidersHorizontal } from 'lucide-react';
 
-export default function PropertiesPage() {
+function PropertiesContent() {
   const searchParams = useSearchParams();
   const [filters, setFilters] = useState<SearchFiltersType>({});
   const [selectedProperty, setSelectedProperty] = useState<string | undefined>();
@@ -143,5 +143,13 @@ export default function PropertiesPage() {
         </Tabs>
       </div>
     </div>
+  );
+}
+
+export default function PropertiesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Chargement...</div>}>
+      <PropertiesContent />
+    </Suspense>
   );
 }

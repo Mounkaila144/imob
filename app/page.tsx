@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +24,7 @@ interface SearchFilters {
   bedrooms?: number;
 }
 
-export default function HomePage() {
+function HomeContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<SearchFilters>({});
   const [showFilters, setShowFilters] = useState(false);
@@ -454,5 +454,13 @@ export default function HomePage() {
       <PartnersCarousel />
 
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Chargement...</div>}>
+      <HomeContent />
+    </Suspense>
   );
 }
