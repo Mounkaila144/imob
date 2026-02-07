@@ -1,7 +1,8 @@
 'use client';
 
 import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
+import { useSubscription } from '@/hooks/useSubscription';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -17,7 +18,9 @@ import {
   Menu,
   X,
   Bell,
-  User
+  User,
+  CreditCard,
+  AlertTriangle
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -26,8 +29,13 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, loading, logout } = useAuth();
+  const { isActive: subscriptionActive, loading: subLoading } = useSubscription();
   const router = useRouter();
+  const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const isSubscriptionPage = pathname === '/dashboard/subscription';
+  const showBlockingOverlay = !subLoading && !subscriptionActive && !isSubscriptionPage;
 
   useEffect(() => {
     if (!loading && (!user || user.role !== 'lister')) {
@@ -74,7 +82,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       name: 'Nouvelle Propriété',
       href: '/dashboard/properties/create',
       icon: Plus,
-    }
+    },
+    {
+      name: 'Mon Abonnement',
+      href: '/dashboard/subscription',
+      icon: CreditCard,
+    },
   ];
 
   return (
@@ -207,6 +220,29 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
 
         <main className="flex-1 relative overflow-y-auto focus:outline-none">
+          {showBlockingOverlay && (
+            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
+              <div className="text-center max-w-md p-8">
+                <div className="bg-red-100 p-4 rounded-full w-fit mx-auto mb-4">
+                  <AlertTriangle className="h-10 w-10 text-red-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  Abonnement requis
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Vous devez avoir un abonnement actif pour accéder au dashboard.
+                  Consultez les plans disponibles pour continuer.
+                </p>
+                <Button
+                  onClick={() => router.push('/dashboard/subscription')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Voir les plans d&apos;abonnement
+                </Button>
+              </div>
+            </div>
+          )}
           {children}
         </main>
       </div>

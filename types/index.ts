@@ -144,3 +144,63 @@ export interface PartnerPublic {
   logo_url: string | null;
   website_url: string | null;
 }
+
+// Subscription types
+
+export interface SubscriptionPlan {
+  id: number;
+  name: string;
+  slug: string;
+  duration_months: 1 | 6 | 12;
+  price: number;
+  currency: string;
+  is_active: boolean;
+}
+
+export type SubscriptionStatus = 'active' | 'expired' | 'cancelled';
+
+export interface Subscription {
+  id: number;
+  user_id: number;
+  user: User;
+  plan: SubscriptionPlan;
+  plan_id: number;
+  status: SubscriptionStatus;
+  starts_at: string;
+  ends_at: string;
+  cancelled_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SubscriptionStatistics {
+  total: number;
+  active: number;
+  expired: number;
+  cancelled: number;
+  expiring_soon: number;
+  revenue: number;
+}
+
+export interface PaginatedSubscriptions {
+  data: Subscription[];
+  pagination: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number;
+    to: number;
+    has_more_pages: boolean;
+  };
+}
+
+export interface SubscriptionFilters {
+  status?: string;
+  plan_id?: number;
+  search?: string;
+  expiring_soon?: boolean;
+  per_page?: number;
+  sort_by?: string;
+  sort_order?: string;
+}

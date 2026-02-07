@@ -17,7 +17,8 @@ import {
   X,
   Bell,
   User,
-  Handshake
+  Handshake,
+  CreditCard
 } from 'lucide-react';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -80,6 +81,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       name: 'Partenaires',
       href: '/admin/partners',
       icon: Handshake,
+    },
+    {
+      name: 'Abonnements',
+      href: '/admin/subscriptions',
+      icon: CreditCard,
     },
   ];
 

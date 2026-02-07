@@ -22,10 +22,11 @@ class ListingController extends ApiController
         $query = Listing::with(['user.profile', 'photos', 'amenities']);
 
         // Pour les admins connectés, montrer toutes les propriétés
-        // Pour les autres, seulement les propriétés publiées
+        // Pour les autres, seulement les propriétés publiées + vendeurs avec abonnement actif
         $user = auth('api')->user();
         if (!$user || !$user->isAdmin()) {
-            $query->where('status', 'published');
+            $query->where('status', 'published')
+                  ->withActiveSubscription();
         }
 
         // Filtres de recherche
@@ -185,6 +186,25 @@ class ListingController extends ApiController
     {
         $listing = Listing::with(['user.profile', 'photos', 'amenities'])
             ->findOrFail($id);
+
+        // Pour les non-admins, vérifier que le vendeur a un abonnement actif
+        $currentUser = auth('api')->user();
+        $isAdmin = $currentUser && $currentUser->isAdmin();
+        $isOwner = $currentUser && $currentUser->id === $listing->user_id;
+
+        if (!$isAdmin && !$isOwner) {
+            $seller = $listing->user;
+            if ($seller->role === 'lister') {
+                $hasActive = $seller->subscriptions()
+                    ->where('status', 'active')
+                    ->where('ends_at', '>', now())
+                    ->exists();
+
+                if (!$hasActive) {
+                    return $this->notFoundResponse('Cette annonce n\'est plus disponible');
+                }
+            }
+        }
 
         // Incrémenter le compteur de vues si l'annonce est publiée
         if ($listing->isPublished()) {

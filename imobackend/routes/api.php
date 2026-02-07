@@ -7,6 +7,8 @@ use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ListingPhotoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -73,10 +75,25 @@ Route::middleware(['auth:api', 'active.user'])->group(function () {
             Route::put('/reorder', [PartnerController::class, 'reorder']);
             Route::put('/{partner}/toggle-active', [PartnerController::class, 'toggleActive']);
         });
+
+        // Subscription management routes
+        Route::get('admin/subscription-plans', [AdminSubscriptionController::class, 'plans']);
+        Route::put('admin/subscription-plans/{plan}', [AdminSubscriptionController::class, 'updatePlan']);
+        Route::prefix('admin/subscriptions')->group(function () {
+            Route::get('/', [AdminSubscriptionController::class, 'index']);
+            Route::get('/statistics', [AdminSubscriptionController::class, 'statistics']);
+            Route::post('/', [AdminSubscriptionController::class, 'store']);
+            Route::put('/{subscription}/extend', [AdminSubscriptionController::class, 'extend']);
+            Route::put('/{subscription}/cancel', [AdminSubscriptionController::class, 'cancel']);
+        });
     });
 
     // Lister routes (agents immobiliers)
     Route::middleware('role:admin,lister')->group(function () {
+        // Subscription routes for listers
+        Route::get('my-subscription', [SubscriptionController::class, 'mySubscription']);
+        Route::get('subscription-plans', [SubscriptionController::class, 'plans']);
+
         Route::post('listings', [ListingController::class, 'store']);
         Route::put('listings/{listing}', [ListingController::class, 'update']);
         Route::delete('listings/{listing}', [ListingController::class, 'destroy']);

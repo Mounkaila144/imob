@@ -134,6 +134,23 @@ class Listing extends Model
         return $query->where('is_featured', true);
     }
 
+    /**
+     * Only include listings from sellers with an active subscription.
+     */
+    public function scopeWithActiveSubscription($query)
+    {
+        return $query->whereHas('user', function ($q) {
+            $q->where(function ($userQuery) {
+                // Admins are always visible (they don't need a subscription)
+                $userQuery->where('role', 'admin')
+                    ->orWhereHas('subscriptions', function ($subQuery) {
+                        $subQuery->where('status', 'active')
+                                 ->where('ends_at', '>', now());
+                    });
+            });
+        });
+    }
+
     public function scopePriceBetween($query, $min, $max)
     {
         return $query->whereBetween('price', [$min, $max]);

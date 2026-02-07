@@ -94,6 +94,19 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(ActivityLog::class, 'causer_id');
     }
 
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function activeSubscription()
+    {
+        return $this->hasOne(Subscription::class)
+                     ->where('status', 'active')
+                     ->where('ends_at', '>', now())
+                     ->latest('starts_at');
+    }
+
     // Scopes
     public function scopeActive($query)
     {
