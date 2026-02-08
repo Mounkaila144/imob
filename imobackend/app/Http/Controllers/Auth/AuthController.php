@@ -10,6 +10,7 @@ use App\Models\ActivityLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -201,6 +202,67 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Mot de passe modifié avec succès',
+        ]);
+    }
+
+    /**
+     * Delete authenticated user's account and all associated data
+     */
+    public function deleteAccount(Request $request): JsonResponse
+    {
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        $user = auth()->user();
+
+        if (!Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mot de passe incorrect',
+            ], 422);
+        }
+
+        // Log before deletion
+        ActivityLog::log('account_deleted', $user, $user, [
+            'email' => $user->email,
+            'role' => $user->role,
+        ]);
+
+        // Delete listing photos files
+        foreach ($user->listings as $listing) {
+            $listing->deletePhotoFiles();
+        }
+
+        // Delete avatar file if exists
+        if ($user->profile && $user->profile->avatar_path) {
+            Storage::disk('public')->delete($user->profile->avatar_path);
+        }
+
+        // Delete related data (cascade)
+        $user->profile()->delete();
+        $user->subscriptions()->delete();
+        $user->favorites()->detach();
+        $user->listings()->each(function ($listing) {
+            $listing->photos()->delete();
+            $listing->amenities()->detach();
+            $listing->inquiries()->delete();
+            $listing->deals()->delete();
+            $listing->reports()->delete();
+            $listing->delete();
+        });
+        $user->inquiries()->delete();
+        $user->listingReports()->delete();
+
+        // Invalidate token
+        JWTAuth::invalidate(JWTAuth::getToken());
+
+        // Delete the user
+        $user->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Votre compte et toutes vos données ont été supprimés avec succès',
         ]);
     }
 

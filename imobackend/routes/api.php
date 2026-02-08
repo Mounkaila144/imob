@@ -34,6 +34,7 @@ Route::group(['prefix' => 'auth'], function () {
         Route::post('refresh', [AuthController::class, 'refresh']);
         Route::put('profile', [AuthController::class, 'updateProfile']);
         Route::put('password', [AuthController::class, 'changePassword']);
+        Route::delete('delete-account', [AuthController::class, 'deleteAccount']);
     });
 });
 
