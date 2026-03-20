@@ -1130,7 +1130,148 @@ Récupérer la liste des partenaires actifs (pour affichage sur la page d'accuei
 
 ---
 
-## 7. Codes d'erreur
+## 7. Abonnements vendeur
+
+Les vendeurs (rôle `lister`) doivent avoir un abonnement actif pour que leurs annonces soient visibles sur la plateforme. Quand un abonnement expire ou est annulé, toutes les annonces du vendeur sont automatiquement masquées du site public.
+
+### 7.1 Mon abonnement
+
+Récupérer l'abonnement actuel du vendeur connecté.
+
+**Endpoint:** `GET /my-subscription`
+
+**Authentification requise:** Oui (rôle: `lister` ou `admin`)
+
+**Réponse succès (200) — Abonnement trouvé :**
+
+```json
+{
+  "success": true,
+  "message": "Abonnement récupéré avec succès",
+  "data": {
+    "id": 12,
+    "user_id": 5,
+    "plan": {
+      "id": 2,
+      "name": "6 Mois",
+      "slug": "6-mois",
+      "duration_months": 6,
+      "price": 25000,
+      "currency": "FCFA",
+      "is_active": true
+    },
+    "plan_id": 2,
+    "status": "active",
+    "starts_at": "2025-01-15T00:00:00.000Z",
+    "ends_at": "2025-07-15T00:00:00.000Z",
+    "cancelled_at": null,
+    "created_at": "2025-01-15T10:30:00.000Z",
+    "updated_at": "2025-01-15T10:30:00.000Z"
+  }
+}
+```
+
+**Réponse succès (200) — Aucun abonnement :**
+
+```json
+{
+  "success": true,
+  "message": "Aucun abonnement trouvé",
+  "data": null
+}
+```
+
+**Logique d'expiration automatique :**
+
+Lorsque cet endpoint est appelé, si l'abonnement est en statut `active` mais que la date `ends_at` est dépassée, le backend passe automatiquement le statut à `expired` avant de retourner la réponse.
+
+**Propriétés calculées côté client :**
+
+| Propriété | Calcul | Description |
+|-----------|--------|-------------|
+| `isActive` | `status === 'active' && ends_at > now()` | L'abonnement est-il valide ? |
+| `daysRemaining` | `max(0, ceil((ends_at - now) / 86400000))` | Jours restants avant expiration |
+| `isExpiringSoon` | `isActive && daysRemaining <= 7` | Expire dans 7 jours ou moins |
+| `isExpired` | `status === 'expired' || ends_at <= now()` | L'abonnement est-il expiré ? |
+
+---
+
+### 7.2 Plans d'abonnement disponibles
+
+Récupérer la liste des plans d'abonnement actifs.
+
+**Endpoint:** `GET /subscription-plans`
+
+**Authentification requise:** Oui (rôle: `lister` ou `admin`)
+
+**Réponse succès (200) :**
+
+```json
+{
+  "success": true,
+  "message": "Plans récupérés avec succès",
+  "data": [
+    {
+      "id": 1,
+      "name": "1 Mois",
+      "slug": "1-mois",
+      "duration_months": 1,
+      "price": 5000,
+      "currency": "FCFA",
+      "is_active": true
+    },
+    {
+      "id": 2,
+      "name": "6 Mois",
+      "slug": "6-mois",
+      "duration_months": 6,
+      "price": 25000,
+      "currency": "FCFA",
+      "is_active": true
+    },
+    {
+      "id": 3,
+      "name": "1 An",
+      "slug": "1-an",
+      "duration_months": 12,
+      "price": 45000,
+      "currency": "FCFA",
+      "is_active": true
+    }
+  ]
+}
+```
+
+---
+
+### 7.3 Impact sur les annonces
+
+Lorsqu'un vendeur n'a **pas** ou **plus** d'abonnement actif :
+
+| Endpoint | Comportement |
+|----------|-------------|
+| `GET /listings` | Les annonces du vendeur sont **exclues** des résultats publics |
+| `GET /listings/{id}` | Retourne `404 "Cette annonce n'est plus disponible"` |
+| `GET /my-listings` | Le vendeur peut toujours voir ses propres annonces (aucun changement) |
+| Dashboard admin | L'admin voit toujours toutes les annonces |
+
+Les annonces ne sont **pas supprimées**. Elles redeviennent visibles dès qu'un nouvel abonnement est activé.
+
+---
+
+### 7.4 Statuts d'abonnement
+
+| Statut | Description |
+|--------|-------------|
+| `active` | Abonnement en cours et valide (`ends_at` dans le futur) |
+| `expired` | Abonnement dont la date de fin est dépassée |
+| `cancelled` | Abonnement annulé manuellement par l'administrateur |
+
+> **Règle :** Un seul abonnement actif par vendeur à la fois.
+
+---
+
+## 8. Codes d'erreur
 
 ### Codes HTTP
 
@@ -1167,7 +1308,7 @@ Récupérer la liste des partenaires actifs (pour affichage sur la page d'accuei
 
 ---
 
-## 8. Modèles de données
+## 9. Modèles de données
 
 ### User (Utilisateur)
 
@@ -1292,6 +1433,37 @@ interface Partner {
 }
 ```
 
+### SubscriptionPlan (Plan d'abonnement)
+
+```typescript
+interface SubscriptionPlan {
+  id: number;
+  name: string;
+  slug: string;
+  duration_months: 1 | 6 | 12;
+  price: number;
+  currency: string;
+  is_active: boolean;
+}
+```
+
+### Subscription (Abonnement)
+
+```typescript
+interface Subscription {
+  id: number;
+  user_id: number;
+  plan: SubscriptionPlan;
+  plan_id: number;
+  status: 'active' | 'expired' | 'cancelled';
+  starts_at: string;
+  ends_at: string;
+  cancelled_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+```
+
 ### Pagination
 
 ```typescript
@@ -1354,6 +1526,22 @@ curl -X POST https://guidacenter.com/api/favorites \
   }'
 ```
 
+### Mon abonnement (vendeur)
+
+```bash
+curl -X GET https://guidacenter.com/api/my-subscription \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"
+```
+
+### Plans d'abonnement disponibles
+
+```bash
+curl -X GET https://guidacenter.com/api/subscription-plans \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"
+```
+
 ---
 
 ## Notes importantes
@@ -1370,7 +1558,9 @@ curl -X POST https://guidacenter.com/api/favorites \
 
 6. **Timezone** : Toutes les dates sont en UTC au format ISO 8601.
 
+7. **Abonnements** : Les vendeurs (`lister`) doivent avoir un abonnement actif pour que leurs annonces soient visibles publiquement. Sans abonnement actif, les annonces sont masquées de `GET /listings` et `GET /listings/{id}` retourne 404. Le vendeur peut toujours voir ses propres annonces via `GET /my-listings`. Les annonces ne sont jamais supprimées : elles redeviennent visibles automatiquement dès qu'un nouvel abonnement est activé.
+
 ---
 
-**Version de l'API:** 1.0
-**Dernière mise à jour:** Décembre 2024
+**Version de l'API:** 1.1
+**Dernière mise à jour:** Février 2026

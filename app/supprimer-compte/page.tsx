@@ -422,7 +422,7 @@ export default function SupprimerComptePage() {
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <div className="flex items-center space-x-2 bg-white/10 px-4 py-2 rounded-lg">
                       <Mail className="h-5 w-5" />
-                      <span>support@guida-center.fr</span>
+                      <span>support@guidacenter.com</span>
                     </div>
                     <div className="flex items-center space-x-2 bg-white/10 px-4 py-2 rounded-lg">
                       <Info className="h-5 w-5" />
@@ -448,7 +448,7 @@ export default function SupprimerComptePage() {
               </a>.
             </p>
             <p className="mt-2">
-              <strong>Guida-Center</strong> - Plateforme Immobilière Moderne - Tous droits réservés &copy; 2026
+              <strong>Guida Center</strong> - Plateforme Immobilière au Niger - Tous droits réservés &copy; 2026
             </p>
           </div>
         </div>

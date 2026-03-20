@@ -262,11 +262,7 @@ export default function ConfidentialitePage() {
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <div className="flex items-center space-x-2 bg-white/10 px-4 py-2 rounded-lg">
                       <Mail className="h-5 w-5" />
-                      <span>dpo@guida-center.fr</span>
-                    </div>
-                    <div className="flex items-center space-x-2 bg-white/10 px-4 py-2 rounded-lg">
-                      <FileText className="h-5 w-5" />
-                      <span>CNIL - Réclamation</span>
+                      <span>support@guidacenter.com</span>
                     </div>
                   </div>
                 </div>
@@ -281,12 +277,11 @@ export default function ConfidentialitePage() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center text-sm text-gray-500">
             <p>
-              Cette politique de confidentialité est conforme au Règlement Général sur la Protection des Données (RGPD)
-              et à la loi Informatique et Libertés. Elle peut être mise à jour périodiquement.
+              Cette politique de confidentialité peut être mise à jour périodiquement.
               Nous vous encourageons à la consulter régulièrement.
             </p>
             <p className="mt-2">
-              <strong>Guida-Center</strong> - Plateforme Immobilière Moderne - Tous droits réservés © 2026
+              <strong>Guida Center</strong> - Plateforme Immobilière au Niger - Tous droits réservés &copy; 2026
             </p>
           </div>
         </div>
